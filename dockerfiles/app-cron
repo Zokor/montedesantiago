@@ -1,0 +1,1 @@
+0 0 * * * cd /var/www/html && php php/cron/delete-users.php >> /var/www/html/cron.log 2>&1

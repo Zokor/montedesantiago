@@ -1,0 +1,1 @@
+i want to build an backoffice with it which can be accessible through the "bo" route
