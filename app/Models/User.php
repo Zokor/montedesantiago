@@ -25,8 +25,8 @@ class User extends Authenticatable
         'password',
         'is_active',
         'is_mfa_enabled',
-        'mfa_secret',
-        'mfa_backup_codes',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
         'blocked_at',
         'blocked_reason',
         'last_login_at',
@@ -41,8 +41,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'mfa_secret',
-        'mfa_backup_codes',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -58,7 +58,7 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'is_active' => 'boolean',
             'is_mfa_enabled' => 'boolean',
-            'mfa_backup_codes' => 'array',
+            'two_factor_recovery_codes' => 'array',
             'password' => 'hashed',
         ];
     }
