@@ -45,3 +45,39 @@
     - All endpoints return JSON responses with proper validation and error handling, suitable for API consumption.
 
 This documentation provides a concise source of knowledge for the implemented authentication and MFA system, making it easy to reference and maintain.
+
+## [2025-10-09] Admin Route Refactor
+
+- All admin pages and endpoints are now under the `/bo` slug.
+- Updated `routes/web.php`:
+    - Wrapped dashboard and MFA routes with `Route::prefix('bo')`.
+    - All admin URLs are now `/bo/dashboard`, `/bo/mfa/enable`, etc.
+- No frontend `.tsx` files required changes (no hardcoded admin URLs found).
+- Login and logout endpoints remain at `/bo` and `/logout`.
+
+**Tested:**
+
+- Admin dashboard and MFA endpoints are accessible only under `/bo`.
+
+---
+
+**Summary of Project Organization and Changes**
+
+- All admin functionality is now grouped under the `/bo` prefix for improved separation.
+- Dashboard and MFA endpoints are protected by authentication and verification middleware.
+- Authentication endpoints (`/bo`, `/logout`) are available for login/logout.
+- No hardcoded admin URLs in frontend code, so navigation is handled by backend route changes.
+- This file will continue to track all major organizational and route changes for the project.
+
+---
+
+## [2025-10-09] Login Entry Relocation
+
+- Added a redirect so `/bo` forwards to the `login` route, serving `/bo/login`.
+- Disabled Fortify’s built-in view routes (`config/fortify.php` → `'views' => false`) to ensure `/login` is no longer available.
+- Registered a custom Inertia login view via `Fortify::loginView()` so `/bo/login` renders `resources/js/pages/auth/login.tsx`.
+
+**Status:**
+
+- `/bo/login` renders the Inertia login page.
+- `/login` now returns a 404 because Fortify view routes are disabled.
