@@ -17,8 +17,17 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('is_active')->default(true)->index();
+            $table->boolean('is_mfa_enabled')->default(false)->index();
+            $table->string('mfa_secret', 255)->nullable();
+            $table->json('mfa_backup_codes')->nullable();
+            $table->timestamp('blocked_at')->nullable()->index();
+            $table->string('blocked_reason')->nullable();
+            $table->timestamp('last_login_at')->nullable()->index();
+            $table->string('last_login_ip', 45)->nullable()->index();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

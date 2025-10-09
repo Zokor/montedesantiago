@@ -27,7 +27,7 @@ Each prompt is designed to be **copy-pasted directly into an LLM** (Claude, Chat
 ### Prompt 1.1: Install Required Packages
 
 ```
-I have a fresh Laravel 11 project with React and Vite already set up.
+I have a fresh Laravel 12 project with React and Vite already set up.
 
 Install and configure these packages:
 

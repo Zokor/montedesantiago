@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -11,7 +12,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -22,6 +23,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_active',
+        'is_mfa_enabled',
+        'mfa_secret',
+        'mfa_backup_codes',
+        'blocked_at',
+        'blocked_reason',
+        'last_login_at',
+        'last_login_ip',
     ];
 
     /**
@@ -32,6 +41,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'mfa_secret',
+        'mfa_backup_codes',
     ];
 
     /**
@@ -43,6 +54,11 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'blocked_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'is_active' => 'boolean',
+            'is_mfa_enabled' => 'boolean',
+            'mfa_backup_codes' => 'array',
             'password' => 'hashed',
         ];
     }
