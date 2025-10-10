@@ -21,33 +21,47 @@ class MfaController extends Controller
     }
 
     /**
-     * Enable MFA: generate secret and QR code for the authenticated user.
+     * Enable MFA for another user (admin only).
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function enableMfa(Request $request)
+    public function enableMfaForUser(Request $request)
     {
-        $user = $request->user();
+        $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
 
-        // Generate a new secret if not already present
-        if (empty($user->two_factor_secret)) {
-            $secret = $this->google2fa->generateSecretKey();
-            $user->two_factor_secret = Crypt::encryptString($secret);
-            $user->save();
-        } else {
-            $secret = Crypt::decryptString($user->two_factor_secret);
+        $admin = $request->user();
+
+        // Check if user has admin/webmaster role
+        if (!$admin->hasRole('admin') && !$admin->hasRole('webmaster')) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
         }
+
+        $targetUser = \App\Models\User::findOrFail($request->input('user_id'));
+
+        // Don't allow enabling MFA for yourself through this method
+        if ($targetUser->id === $admin->id) {
+            return response()->json(['message' => 'Use the regular MFA enable endpoint for yourself.'], 400);
+        }
+
+        // Generate a new secret for the target user
+        $secret = $this->google2fa->generateSecretKey();
+        $targetUser->two_factor_secret = Crypt::encryptString($secret);
+        $targetUser->save();
 
         // Generate QR code URL (Google Authenticator compatible)
         $qrCodeUrl = $this->google2fa->getQRCodeUrl(
             config('app.name'),
-            $user->email,
+            $targetUser->email,
             $secret
         );
 
         return response()->json([
-            'message' => 'MFA secret generated.',
+            'message' => 'MFA secret generated for user.',
+            'user_id' => $targetUser->id,
+            'user_email' => $targetUser->email,
             'qr_code_url' => $qrCodeUrl,
             'secret' => $secret,
         ]);
@@ -81,6 +95,7 @@ class MfaController extends Controller
 
         // Mark MFA as confirmed
         $user->two_factor_confirmed_at = Carbon::now();
+        $user->is_mfa_enabled = true;
 
         // Generate 10 backup codes (hashed for security)
         $backupCodes = collect(range(1, 10))->map(function () {
@@ -107,6 +122,7 @@ class MfaController extends Controller
         $user->two_factor_secret = null;
         $user->two_factor_recovery_codes = null;
         $user->two_factor_confirmed_at = null;
+        $user->is_mfa_enabled = false;
         $user->save();
 
         return response()->json(['message' => 'MFA disabled successfully.']);

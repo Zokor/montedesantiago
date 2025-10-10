@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         //         'email_verified_at' => now(),
         //     ]
         // );
-        User::firstOrCreate(
+        $webmaster = User::firstOrCreate(
             ['email' => 'bflgomes@gmail.com'],
             [
                 'name' => 'webmaster',
@@ -32,5 +32,11 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // Assign admin role to webmaster
+        if (!$webmaster->hasRole('admin')) {
+            $adminRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin']);
+            $webmaster->assignRole($adminRole);
+        }
     }
 }
