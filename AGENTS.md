@@ -307,7 +307,7 @@ Route::get('/users', function () {
   it('returns all', function () {
   $response = $this->postJson('/api/docs', []);
 
-            $response->assertSuccessful();
+              $response->assertSuccessful();
 
     });
     </code-snippet>
@@ -440,13 +440,13 @@ defaults
 
 - When listing items, use gap utilities for spacing, don't use margins.
 
-          <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
-              <div class="flex gap-8">
-                  <div>Superior</div>
-                  <div>Michigan</div>
-                  <div>Erie</div>
-              </div>
-          </code-snippet>
+            <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
+                <div class="flex gap-8">
+                    <div>Superior</div>
+                    <div>Michigan</div>
+                    <div>Erie</div>
+                </div>
+            </code-snippet>
 
 ### Dark Mode
 
@@ -659,3 +659,28 @@ Wayfinder generates TypeScript constants per route name. When two Laravel routes
     2. Open `http://localhost:5173/` to confirm server responds.
     3. Reproduce error in browser, copy dev terminal output and browser console stack trace.
     4. File an issue including the above plus `vite.config.ts` and `package.json` dev scripts.
+
+## DataType enum (app/Enums/DataType.php)
+
+- Purpose: Canonical server-side enum that defines CMS field types and provides UI metadata and validation helpers.
+- Location: `app/Enums/DataType.php`
+- Notes:
+    - Cases: `SHORT_TEXT`, `TEXT`, `DATE`, `BOOLEAN`, `IMAGE`, `FILE`, `LIST`, `COLLECTION`, `COMPONENT`
+    - Methods:
+        - `label()` — returns a human-friendly label (e.g., `Short Text (max 256 chars)`).
+        - `validationRules()` — returns a Laravel validation rules array for that type (e.g., `['string','max:256']`).
+        - `icon()` — returns a `lucide-react` icon name for UI use (e.g., `Type`).
+    - Intended usage:
+        - Use the enum server-side for validation and to drive admin UI choices.
+        - If the frontend needs to render icons/labels, export a small JS mapping (example: `resources/js/lib/data-types.ts`) that mirrors `DataType::icon()` / `label()` outputs.
+    - Implementation reminders:
+        - Validation rules included are conservative defaults — adjust file/image size limits and collection reference types per project needs.
+        - Keep business logic and authorization on the server (middleware). The enum is a data/contract helper, not an authorization mechanism.
+
+</content>
+<task_progress>
+- [x] Analyze requirement for AGENTS.md update
+- [x] Append DataType enum notes to AGENTS.md
+- [ ] Optional: add frontend JS mapping for DataType
+- [ ] Optional: add unit tests for DataType methods
+</task_progress>

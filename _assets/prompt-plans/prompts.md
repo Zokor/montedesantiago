@@ -205,7 +205,7 @@ Provide complete app.jsx and app.blade.php code.
 Create a DataType enum for the headless CMS.
 
 Create app/Enums/DataType.php with:
-- 8 types: SHORT_TEXT, TEXT, DATE, BOOLEAN, IMAGE, FILE, LIST, COLLECTION
+- 9 types: SHORT_TEXT, TEXT, DATE, BOOLEAN, IMAGE, FILE, LIST, COLLECTION, COMPONENT
 - label() method that returns user-friendly names
 - validationRules() method that returns Laravel validation rules array for each type
 - icon() method that returns lucide-react icon names for each type
@@ -519,10 +519,10 @@ Create resources/js/Pages/Collections/Create.jsx and Edit.jsx:
 - Form sections: Basic Info, Fields Builder
 - Basic info: Name, Slug (auto-generated), Description
 - Fields builder:
-  - Add field button
-  - Drag-drop field reordering using @dnd-kit
-  - Each field card shows: Name, Type selector, Required toggle, Remove button
-  - Field properties in expandable section
+    - Add field button
+    - Drag-drop field reordering using @dnd-kit
+    - Each field card shows: Name, Type selector, Required toggle, Remove button
+    - Field properties in expandable section
 
 Create resources/js/Pages/Collections/components/FieldBuilder.jsx:
 
@@ -618,15 +618,15 @@ Create resources/js/Pages/Collections/Items/Create.jsx and Edit.jsx:
 
 - Dynamic form generation based on collection.fields
 - Render appropriate input component for each field type:
-  ```jsx
-  switch (field.data_type) {
-    case 'short_text':
-      return <ShortTextInput />;
-    case 'text':
-      return <RichTextEditor />;
-    // ... etc
-  }
-  ```
+    ```jsx
+    switch (field.data_type) {
+        case 'short_text':
+            return <ShortTextInput />;
+        case 'text':
+            return <RichTextEditor />;
+        // ... etc
+    }
+    ```
 - Form layout: 2 columns on desktop, 1 on mobile
 - Published toggle
 - Submit to POST/PUT /bo/collections/{id}/items
@@ -728,9 +728,9 @@ Create the visual component builder interface (Part 1 - Layout & Palette).
 Create resources/js/Pages/Components/Create.jsx and Edit.jsx:
 
 - Three-panel layout:
-  - Left: Field Types Palette (20% width)
-  - Center: Component Canvas (50% width)
-  - Right: Field Properties Panel (30% width)
+    - Left: Field Types Palette (20% width)
+    - Center: Component Canvas (50% width)
+    - Right: Field Properties Panel (30% width)
 - Responsive: Stack on mobile
 
 Create resources/js/Pages/Components/components/FieldPalette.jsx:
@@ -745,14 +745,19 @@ Data types array:
 
 ```jsx
 const fieldTypes = [
-  { type: 'short_text', icon: 'Type', label: 'Short Text', color: 'blue' },
-  { type: 'text', icon: 'AlignLeft', label: 'Long Text', color: 'purple' },
-  { type: 'date', icon: 'Calendar', label: 'Date', color: 'green' },
-  { type: 'boolean', icon: 'ToggleLeft', label: 'Boolean', color: 'yellow' },
-  { type: 'image', icon: 'Image', label: 'Image', color: 'pink' },
-  { type: 'file', icon: 'File', label: 'File', color: 'orange' },
-  { type: 'list', icon: 'List', label: 'List', color: 'indigo' },
-  { type: 'collection', icon: 'Database', label: 'Collection', color: 'teal' },
+    { type: 'short_text', icon: 'Type', label: 'Short Text', color: 'blue' },
+    { type: 'text', icon: 'AlignLeft', label: 'Long Text', color: 'purple' },
+    { type: 'date', icon: 'Calendar', label: 'Date', color: 'green' },
+    { type: 'boolean', icon: 'ToggleLeft', label: 'Boolean', color: 'yellow' },
+    { type: 'image', icon: 'Image', label: 'Image', color: 'pink' },
+    { type: 'file', icon: 'File', label: 'File', color: 'orange' },
+    { type: 'list', icon: 'List', label: 'List', color: 'indigo' },
+    {
+        type: 'collection',
+        icon: 'Database',
+        label: 'Collection',
+        color: 'teal',
+    },
 ];
 ```
 
@@ -774,12 +779,12 @@ Create resources/js/Pages/Components/components/ComponentCanvas.jsx:
 - Drag-drop reordering of existing fields using @dnd-kit
 - Empty state when no fields
 - Each field shows as sortable card:
-  - Drag handle
-  - Field name
-  - Field type badge
-  - Required indicator
-  - Click to select for editing
-  - Remove button
+    - Drag handle
+    - Field name
+    - Field type badge
+    - Required indicator
+    - Click to select for editing
+    - Remove button
 
 Create resources/js/Pages/Components/components/SortableField.jsx:
 
@@ -791,12 +796,12 @@ Create resources/js/Pages/Components/components/FieldPropertiesPanel.jsx:
 
 - Empty state: "Select a field to edit properties"
 - When field selected:
-  - Field Name input
-  - Field Slug input (auto-generated, editable)
-  - Required toggle
-  - Help Text textarea
-  - Type-specific config section (collapsible)
-  - Updates field in parent state
+    - Field Name input
+    - Field Slug input (auto-generated, editable)
+    - Required toggle
+    - Help Text textarea
+    - Type-specific config section (collapsible)
+    - Updates field in parent state
 
 Implement drag-drop logic:
 
@@ -821,10 +826,10 @@ In resources/js/Pages/Components/Create.jsx and Edit.jsx:
 
 ```jsx
 const [formData, setFormData] = useState({
-  name: '',
-  slug: '',
-  description: '',
-  fields: [],
+    name: '',
+    slug: '',
+    description: '',
+    fields: [],
 });
 ```
 
@@ -919,12 +924,12 @@ Create the Pages list page.
 Create resources/js/Pages/Pages/Index.jsx:
 
 - Table view with columns:
-  - Title
-  - Slug
-  - Status (badge with color)
-  - Homepage (icon if true)
-  - Last Updated
-  - Actions
+    - Title
+    - Slug
+    - Status (badge with color)
+    - Homepage (icon if true)
+    - Last Updated
+    - Actions
 - Filters: Status (all/draft/published), Homepage only
 - Search by title
 - Quick actions: Edit, Duplicate, Delete, Publish/Unpublish
@@ -954,14 +959,14 @@ Create the page composer interface (Part 1 - Layout & Component Selector).
 Create resources/js/Pages/Pages/Create.jsx and Edit.jsx:
 
 - Two-panel layout:
-  - Left (30%): Page metadata
-  - Right (70%): Component canvas
+    - Left (30%): Page metadata
+    - Right (70%): Component canvas
 - Left panel fields:
-  - Title input
-  - Slug (auto-generated)
-  - Homepage toggle
-  - Status select (draft/published)
-  - "Add Component" button
+    - Title input
+    - Slug (auto-generated)
+    - Homepage toggle
+    - Status select (draft/published)
+    - "Add Component" button
 - Right panel: Component composition canvas
 
 Create resources/js/Pages/Pages/components/ComponentSelector.jsx:
@@ -996,11 +1001,11 @@ Create resources/js/Pages/Pages/components/PageCanvas.jsx:
 
 - List of components added to page
 - Each component instance shows:
-  - Component name/type
-  - Preview of data (first 2-3 fields)
-  - Edit button (opens data editor)
-  - Remove button
-  - Drag handle for reordering
+    - Component name/type
+    - Preview of data (first 2-3 fields)
+    - Edit button (opens data editor)
+    - Remove button
+    - Drag handle for reordering
 - Drag-drop reordering using @dnd-kit
 - Empty state when no components
 
@@ -1056,10 +1061,10 @@ Create resources/js/Pages/Pages/components/VersionHistory.jsx:
 
 - Button to open version history modal
 - List of versions showing:
-  - Date/time
-  - Author name
-  - Change summary
-  - View/Restore buttons
+    - Date/time
+    - Author name
+    - Change summary
+    - View/Restore buttons
 - Timeline or list layout
 - Restore confirmation dialog
 
@@ -1067,10 +1072,10 @@ Create resources/js/Pages/Pages/components/VersionComparison.jsx:
 
 - Side-by-side diff view
 - Highlight changes:
-  - Title/slug changes
-  - Components added (green)
-  - Components removed (red)
-  - Data field changes (yellow)
+    - Title/slug changes
+    - Components added (green)
+    - Components removed (red)
+    - Data field changes (yellow)
 - Close button
 
 API calls:
@@ -1159,10 +1164,10 @@ Create resources/js/Pages/Media/components/MediaGrid.jsx:
 
 - Grid of media items
 - Each item shows:
-  - Thumbnail/icon
-  - Checkbox for selection
-  - Filename
-  - Click to open details
+    - Thumbnail/icon
+    - Checkbox for selection
+    - Filename
+    - Click to open details
 - Lazy loading with intersection observer
 
 Create resources/js/Pages/Media/components/MediaUploader.jsx:
@@ -1177,14 +1182,14 @@ Create resources/js/Pages/Media/components/MediaUploader.jsx:
 Create resources/js/Pages/Media/components/MediaDetails.jsx:
 
 - Drawer/modal showing:
-  - Large preview
-  - Filename
-  - File size, dimensions, type
-  - Upload date
-  - Direct URL with copy button
-  - Metadata editor: Alt text, Title, Description
-  - Replace file button
-  - Delete button
+    - Large preview
+    - Filename
+    - File size, dimensions, type
+    - Upload date
+    - Direct URL with copy button
+    - Metadata editor: Alt text, Title, Description
+    - Replace file button
+    - Delete button
 
 API endpoints:
 
@@ -1209,14 +1214,14 @@ Create resources/js/Components/MediaPicker.jsx:
 
 - Modal with tabs: Browse / Upload
 - Browse tab:
-  - Grid of media items
-  - Search and filter
-  - Select single or multiple (based on props)
-  - Preview selected
-  - Confirm selection button
+    - Grid of media items
+    - Search and filter
+    - Select single or multiple (based on props)
+    - Preview selected
+    - Confirm selection button
 - Upload tab:
-  - Drag-drop uploader
-  - Upload and auto-select
+    - Drag-drop uploader
+    - Upload and auto-select
 - Props: multiple (bool), onSelect (callback), defaultValue
 
 Update resources/js/Components/Forms/DataTypeFields/ImageUploader.jsx:
@@ -1298,12 +1303,12 @@ Create the Users management interface.
 Create resources/js/Pages/Users/Index.jsx:
 
 - Table with columns:
-  - Name
-  - Email
-  - Status (Active/Blocked badge)
-  - MFA Enabled (icon)
-  - Last Login
-  - Actions dropdown
+    - Name
+    - Email
+    - Status (Active/Blocked badge)
+    - MFA Enabled (icon)
+    - Last Login
+    - Actions dropdown
 - Search by name/email
 - Filter by status (all/active/blocked)
 - "Add User" button
@@ -1312,11 +1317,11 @@ Create resources/js/Pages/Users/Index.jsx:
 Create resources/js/Pages/Users/Create.jsx and Edit.jsx:
 
 - Form fields:
-  - Name (required)
-  - Email (required, unique)
-  - Password (required on create, optional on edit)
-  - Active toggle
-  - MFA enabled (read-only, controlled by user)
+    - Name (required)
+    - Email (required, unique)
+    - Password (required on create, optional on edit)
+    - Active toggle
+    - MFA enabled (read-only, controlled by user)
 - Submit to POST/PUT /bo/users/{id}
 
 Create resources/js/Pages/Users/components/BlockUserDialog.jsx:
@@ -1349,26 +1354,26 @@ Create user profile and MFA management pages.
 Create resources/js/Pages/Profile/Index.jsx:
 
 - User can edit own profile:
-  - Name
-  - Email
-  - Change password section
+    - Name
+    - Email
+    - Change password section
 - MFA section:
-  - Current status (enabled/disabled)
-  - Enable/disable toggle
-  - View backup codes
-  - Regenerate backup codes
+    - Current status (enabled/disabled)
+    - Enable/disable toggle
+    - View backup codes
+    - Regenerate backup codes
 
 Create resources/js/Pages/Profile/components/MfaSetup.jsx:
 
 - When enabling MFA:
-  - Generate QR code (from backend)
-  - Show secret key for manual entry
-  - Verification code input
-  - Submit to verify and enable
-  - Show backup codes (download/print)
+    - Generate QR code (from backend)
+    - Show secret key for manual entry
+    - Verification code input
+    - Submit to verify and enable
+    - Show backup codes (download/print)
 - When disabling MFA:
-  - Password confirmation
-  - Disable button
+    - Password confirmation
+    - Disable button
 
 Create resources/js/Pages/Profile/components/ChangePasswordForm.jsx:
 
@@ -1456,28 +1461,28 @@ Create the API Token management interface.
 Create resources/js/Pages/Settings/ApiTokens.jsx:
 
 - List of user's tokens showing:
-  - Name/description
-  - Token (masked: ••••••••••••••••abc123)
-  - Permissions
-  - Last used date
-  - Created date
-  - Revoke button
+    - Name/description
+    - Token (masked: ••••••••••••••••abc123)
+    - Permissions
+    - Last used date
+    - Created date
+    - Revoke button
 - "Create New Token" button
 
 Create resources/js/Pages/Settings/components/CreateTokenDialog.jsx:
 
 - Modal form:
-  - Token name/description input
-  - Permissions checkboxes:
-    - pages:read
-    - collections:read
-    - All others as needed
-  - Optional expiry date picker
-  - Create button
+    - Token name/description input
+    - Permissions checkboxes:
+        - pages:read
+        - collections:read
+        - All others as needed
+    - Optional expiry date picker
+    - Create button
 - On success:
-  - Show token in alert/modal (only once!)
-  - "Copy to clipboard" button
-  - Warning: "Save this token, you won't see it again"
+    - Show token in alert/modal (only once!)
+    - "Copy to clipboard" button
+    - Warning: "Save this token, you won't see it again"
 
 API calls:
 
@@ -1489,14 +1494,14 @@ Token display after creation:
 
 ```jsx
 <Alert>
-  <AlertTitle>Token Created Successfully</AlertTitle>
-  <AlertDescription>
-    <code className='block p-2 bg-gray-100 rounded'>{token}</code>
-    <Button onClick={copyToClipboard}>Copy Token</Button>
-    <p className='text-red-600 mt-2'>
-      Save this token now. You won't be able to see it again!
-    </p>
-  </AlertDescription>
+    <AlertTitle>Token Created Successfully</AlertTitle>
+    <AlertDescription>
+        <code className="block rounded bg-gray-100 p-2">{token}</code>
+        <Button onClick={copyToClipboard}>Copy Token</Button>
+        <p className="mt-2 text-red-600">
+            Save this token now. You won't be able to see it again!
+        </p>
+    </AlertDescription>
 </Alert>
 ```
 
@@ -1515,20 +1520,20 @@ Create the public API endpoints for consuming CMS content.
 Create app/Http/Controllers/Api/V1/PageController.php:
 
 - index() - List all published pages
-  - Filters: homepage (bool)
-  - Returns: id, title, slug, is_homepage, components with data
+    - Filters: homepage (bool)
+    - Returns: id, title, slug, is_homepage, components with data
 - show($slug) - Get single page by slug
-  - Only published pages
-  - Include all components with data
-  - Transform media references to full URLs
+    - Only published pages
+    - Include all components with data
+    - Transform media references to full URLs
 
 Create app/Http/Controllers/Api/V1/CollectionController.php:
 
 - index($slug) - List items in collection
-  - Only published items
-  - Filters: search, sort_by, sort_dir
-  - Pagination
-  - Transform media references to full URLs
+    - Only published items
+    - Filters: search, sort_by, sort_dir
+    - Pagination
+    - Transform media references to full URLs
 - show($slug, $id) - Get single item
 
 Create app/Http/Resources/PageApiResource.php:
@@ -1537,24 +1542,24 @@ Create app/Http/Resources/PageApiResource.php:
 
 ```json
 {
-  "id": 1,
-  "title": "Homepage",
-  "slug": "home",
-  "is_homepage": true,
-  "published_at": "2024-01-15T10:30:00Z",
-  "components": [
-    {
-      "type": "hero-section",
-      "data": {
-        "heading": "Welcome",
-        "image": {
-          "id": 123,
-          "url": "https://cdn.example.com/hero.jpg",
-          "alt": "Hero image"
+    "id": 1,
+    "title": "Homepage",
+    "slug": "home",
+    "is_homepage": true,
+    "published_at": "2024-01-15T10:30:00Z",
+    "components": [
+        {
+            "type": "hero-section",
+            "data": {
+                "heading": "Welcome",
+                "image": {
+                    "id": 123,
+                    "url": "https://cdn.example.com/hero.jpg",
+                    "alt": "Hero image"
+                }
+            }
         }
-      }
-    }
-  ]
+    ]
 }
 ```
 
@@ -1639,30 +1644,29 @@ Create the webhooks system for event notifications.
 Create migrations:
 
 1. create_webhooks_table
-
-   - id, user_id (FK), name, url, events (JSON array), secret, is_active, timestamps
+    - id, user_id (FK), name, url, events (JSON array), secret, is_active, timestamps
 
 2. create_webhook_logs_table
-   - id, webhook_id (FK), event, status_code, response (text), sent_at, timestamps
+    - id, webhook_id (FK), event, status_code, response (text), sent_at, timestamps
 
 Create app/Models/Webhook.php and app/Models/WebhookLog.php
 
 Create app/Services/WebhookService.php:
 
 - dispatch(string $event, mixed $data): void
-  - Find active webhooks listening to event
-  - Queue webhook call (don't block request)
-  - Sign payload with HMAC-SHA256
-  - Retry on failure (3 attempts with exponential backoff)
-  - Log all attempts
+    - Find active webhooks listening to event
+    - Queue webhook call (don't block request)
+    - Sign payload with HMAC-SHA256
+    - Retry on failure (3 attempts with exponential backoff)
+    - Log all attempts
 
 Create app/Jobs/SendWebhookJob.php:
 
 - Send HTTP POST to webhook URL
 - Include headers:
-  - X-Webhook-Event: event name
-  - X-Webhook-Signature: HMAC signature
-  - Content-Type: application/json
+    - X-Webhook-Event: event name
+    - X-Webhook-Signature: HMAC signature
+    - Content-Type: application/json
 - Timeout: 10 seconds
 - Log response
 
@@ -1707,36 +1711,36 @@ Create the Webhooks management interface.
 Create resources/js/Pages/Settings/Webhooks.jsx:
 
 - List of webhooks showing:
-  - Name
-  - URL
-  - Events listening to (badges)
-  - Status (active/inactive)
-  - Last delivery status
-  - Actions: Edit, Test, View Logs, Delete
+    - Name
+    - URL
+    - Events listening to (badges)
+    - Status (active/inactive)
+    - Last delivery status
+    - Actions: Edit, Test, View Logs, Delete
 - "Create Webhook" button
 
 Create resources/js/Pages/Settings/components/CreateWebhookDialog.jsx:
 
 - Modal form:
-  - Name input
-  - URL input (must be https://)
-  - Events multi-select checkboxes:
-    - page.published
-    - page.unpublished
-    - collection.item.created
-    - etc.
-  - Secret input (optional, for signature verification)
-  - Active toggle
+    - Name input
+    - URL input (must be https://)
+    - Events multi-select checkboxes:
+        - page.published
+        - page.unpublished
+        - collection.item.created
+        - etc.
+    - Secret input (optional, for signature verification)
+    - Active toggle
 - Submit to POST /bo/webhooks
 
 Create resources/js/Pages/Settings/components/WebhookLogs.jsx:
 
 - Modal showing delivery logs:
-  - Event name
-  - Status code
-  - Response body
-  - Timestamp
-  - Retry count
+    - Event name
+    - Status code
+    - Response body
+    - Timestamp
+    - Retry count
 - Pagination
 - Fetch from GET /bo/webhooks/{id}/logs
 
@@ -1838,9 +1842,9 @@ Create resources/js/Components/LoadingSpinner.jsx:
 Create resources/js/Components/LoadingSkeleton.jsx:
 
 - Skeleton loaders for:
-  - Table rows
-  - Cards
-  - Forms
+    - Table rows
+    - Cards
+    - Forms
 - Use shadcn Skeleton component
 
 Create resources/js/Components/ErrorBoundary.jsx:
@@ -1860,10 +1864,10 @@ Create resources/js/Components/EmptyState.jsx:
 Update all pages to use loading states:
 
 ```jsx
-if (loading) return <LoadingSkeleton type='table' />;
+if (loading) return <LoadingSkeleton type="table" />;
 if (error) return <ErrorState error={error} />;
 if (!data.length)
-  return <EmptyState title='No items' action={<Button>Create</Button>} />;
+    return <EmptyState title="No items" action={<Button>Create</Button>} />;
 ```
 
 Create resources/js/lib/errorHandler.js:
@@ -1875,12 +1879,12 @@ Add to all axios calls:
 
 ```jsx
 try {
-  const response = await axios.get('/api/...');
-  setData(response.data);
+    const response = await axios.get('/api/...');
+    setData(response.data);
 } catch (error) {
-  handleApiError(error);
+    handleApiError(error);
 } finally {
-  setLoading(false);
+    setLoading(false);
 }
 ```
 
@@ -1917,12 +1921,12 @@ Usage in forms:
 import { useHotkeys } from 'react-hotkeys-hook';
 
 function MyForm() {
-  useHotkeys('ctrl+s, cmd+s', (e) => {
-    e.preventDefault();
-    handleSubmit();
-  });
+    useHotkeys('ctrl+s, cmd+s', (e) => {
+        e.preventDefault();
+        handleSubmit();
+    });
 
-  return <form>...</form>;
+    return <form>...</form>;
 }
 ```
 
