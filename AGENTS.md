@@ -20,7 +20,6 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/wayfinder (WAYFINDER) - v0
 - laravel/mcp (MCP) - v0
 - laravel/pint (PINT) - v1
-- laravel/sail (SAIL) - v1
 - pestphp/pest (PEST) - v4
 - phpunit/phpunit (PHPUNIT) - v12
 - @inertiajs/react (INERTIA) - v2
@@ -308,7 +307,7 @@ Route::get('/users', function () {
   it('returns all', function () {
   $response = $this->postJson('/api/docs', []);
 
-          $response->assertSuccessful();
+            $response->assertSuccessful();
 
     });
     </code-snippet>
@@ -345,9 +344,6 @@ it('has emails', function (string $email) {
 
 - You can use Laravel features like `Event::fake()`, `assertAuthenticated()`, and model factories within Pest v4 browser tests, as well as `RefreshDatabase` (when needed) to ensure a clean state for each test.
 - Interact with the page (click, type, scroll, select, submit, drag-and-drop, touch gestures, etc.) when appropriate to complete the test.
-- If requested, test on multiple browsers (Chrome, Firefox, Safari).
-- If requested, test on different devices and viewports (like iPhone 14 Pro, tablets, or custom breakpoints).
-- Switch color schemes (light/dark mode) when appropriate.
 - Take screenshots or pause tests for debugging when appropriate.
 
 ### Example Tests
@@ -444,13 +440,13 @@ defaults
 
 - When listing items, use gap utilities for spacing, don't use margins.
 
-        <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
-            <div class="flex gap-8">
-                <div>Superior</div>
-                <div>Michigan</div>
-                <div>Erie</div>
-            </div>
-        </code-snippet>
+          <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
+              <div class="flex gap-8">
+                  <div>Superior</div>
+                  <div>Michigan</div>
+                  <div>Erie</div>
+              </div>
+          </code-snippet>
 
 ### Dark Mode
 
@@ -624,3 +620,42 @@ Wayfinder generates TypeScript constants per route name. When two Laravel routes
 - Consider a Pest test verifying each `mfa.*` route is authenticated + guarded by `ensureUserIsActive`.
 
 ---
+
+## Vite / HMR — Frontend dev tips
+
+- Start dev server:
+    - Command: `npm run dev`
+    - Confirms: Vite prints "Local: http://localhost:5173/" when ready.
+
+- Common failure: "server connection lost" / ERR_CONNECTION_REFUSED
+    - Cause: Vite dev server not running, crashed, or bound to a different host (IPv6 vs IPv4).
+    - Quick fixes:
+        - Check the running dev terminal for errors and plugin build failures.
+        - Restart: stop the terminal and run `npm run dev` again.
+        - If browser console shows requests to `http://[::1]:5173`, try `http://localhost:5173` or force Vite host to `localhost` to avoid IPv6 resolution issues.
+        - To expose the dev server on the network, run `npm run dev -- --host` or set `server.host = '0.0.0.0'` in `vite.config.ts`.
+        - For custom local domains (e.g. `montedesantiago.test`), ensure `/etc/hosts` maps the domain to `127.0.0.1` (or the intended IP).
+
+- When dynamic imports fail (Inertia + Vite):
+    - Error: "Failed to fetch dynamically imported module" → Vite not reachable or port mismatch.
+    - Check `vite.config.ts` for `server.port` and ensure the app is connecting to the same port.
+    - Ensure Wayfinder/Vite plugin is generating correct resource paths for `/resources/js/...`.
+
+- HMR disconnects repeatedly:
+    - Inspect for port conflicts or firewall/antivirus blocking port 5173.
+    - If using docker or remote environments, ensure proper host binding and forwarded ports.
+
+- Logging & debugging:
+    - Copy terminal output and browser console stack traces when reporting issues.
+    - If the dev server crashes, run `npm run dev` again and examine the full stack trace.
+
+- Recommended additions to this repo docs:
+    - Node & npm version recommended for development (e.g., Node >= 18, npm >= 9).
+    - Short reproduction steps for Vite-related issues (start server, open localhost:5173, reproduce and capture logs).
+    - Note about Wayfinder route name uniqueness to avoid generated TS duplicate export errors.
+
+- Repro / report checklist:
+    1. Start `npm run dev`.
+    2. Open `http://localhost:5173/` to confirm server responds.
+    3. Reproduce error in browser, copy dev terminal output and browser console stack trace.
+    4. File an issue including the above plus `vite.config.ts` and `package.json` dev scripts.
