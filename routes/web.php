@@ -21,14 +21,14 @@ require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
 
 // Authentication endpoints
-Route::post('bo', [AuthController::class, 'login'])->name('login');
-Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('bo', [AuthController::class, 'login'])->name('auth.login');
+Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 // MFA endpoints (protected by auth and active-user check)
 Route::prefix('bo')->middleware(['auth', 'verified', 'ensureUserIsActive'])->group(function () {
-    Route::post('mfa/enable', [MfaController::class, 'enableMfa'])->name('two-factor.enable');
-    Route::post('mfa/enable-for-user', [MfaController::class, 'enableMfaForUser'])->name('two-factor.enable-for-user');
-    Route::post('mfa/verify-enable', [MfaController::class, 'verifyAndEnableMfa'])->name('two-factor.confirm');
-    Route::post('mfa/disable', [MfaController::class, 'disableMfa'])->name('two-factor.disable');
-    Route::post('mfa/verify', [MfaController::class, 'verifyMfa'])->name('two-factor.login');
+    Route::post('mfa/enable', [MfaController::class, 'enableMfa'])->name('mfa.enable');
+    Route::post('mfa/enable-for-user', [MfaController::class, 'enableMfaForUser'])->name('mfa.enable-for-user');
+    Route::post('mfa/verify-enable', [MfaController::class, 'verifyAndEnableMfa'])->name('mfa.confirm');
+    Route::post('mfa/disable', [MfaController::class, 'disableMfa'])->name('mfa.disable');
+    Route::post('mfa/verify', [MfaController::class, 'verifyMfa'])->name('mfa.login');
 });

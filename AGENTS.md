@@ -308,7 +308,7 @@ Route::get('/users', function () {
   it('returns all', function () {
   $response = $this->postJson('/api/docs', []);
 
-        $response->assertSuccessful();
+          $response->assertSuccessful();
 
     });
     </code-snippet>
@@ -401,6 +401,7 @@ import { Link } from '@inertiajs/react'
 import { Form } from '@inertiajs/react'
 
 export default () => (
+
 <Form action="/users" method="post">
 {({
 errors,
@@ -443,13 +444,13 @@ defaults
 
 - When listing items, use gap utilities for spacing, don't use margins.
 
-      <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
-          <div class="flex gap-8">
-              <div>Superior</div>
-              <div>Michigan</div>
-              <div>Erie</div>
-          </div>
-      </code-snippet>
+        <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
+            <div class="flex gap-8">
+                <div>Superior</div>
+                <div>Michigan</div>
+                <div>Erie</div>
+            </div>
+        </code-snippet>
 
 ### Dark Mode
 
@@ -582,3 +583,44 @@ This documentation provides a concise source of knowledge for the implemented au
 
 - `/bo/login` renders the Inertia login page.
 - `/login` now returns a 404 because Fortify view routes are disabled.
+
+## 2025-10-11 — Route Name De-duplication & Registration Removal
+
+### Summary
+
+Resolved Vite / Wayfinder build failures caused by duplicate generated TypeScript exports stemming from reused Laravel route names. Removed unused user registration UI since registration is disabled. Standardized MFA route names to prevent future collisions.
+
+### Changes
+
+- Removed `resources/js/pages/auth/register.tsx` (registration page) and all references (`register()` helper removed from `welcome.tsx` header and login page footer message simplified).
+- Left Fortify registration routes commented out (no backend exposure) keeping prior intent explicit.
+- Renamed MFA route names in `routes/web.php` from legacy `two-factor.*` style (previous interim naming) to a concise, unique `mfa.*` namespace:
+    - `mfa.enable`
+    - `mfa.enable-for-user`
+    - `mfa.confirm` (was `two-factor.confirm` / `two-factor.verify-enable` previously)
+    - `mfa.disable`
+    - `mfa.login` (TOTP / backup code verification during login)
+- Renamed POST password confirmation route from `password.confirmation` to `password.confirmation.store` to avoid clashing with the GET `password.confirm` route when Wayfinder generated helpers (previous build error: duplicate `confirmation` / `store` exports in generated files).
+
+### Rationale
+
+Wayfinder generates TypeScript constants per route name. When two Laravel routes share the same name (even with different methods or URLs), the emitted TS module re-declares an exported constant (e.g., `confirmation`, `store`, `enable`, `confirm`), causing esbuild compilation errors. By ensuring uniqueness across all named routes (especially GET vs POST pairs & parallel Fortify/MFA endpoints), builds now succeed.
+
+### Result
+
+- `npm run build` now completes successfully (no duplicate export errors).
+- Frontend no longer imports non-existent registration route helpers.
+- MFA naming is clearer (`mfa.*`) aligning with actual endpoint path `/bo/mfa/...`.
+
+### How To Reintroduce Registration (If Needed Later)
+
+1. Uncomment the registration routes in `routes/auth.php` (GET & POST) and assign distinct names (e.g., `register.show`, `register.store`).
+2. Restore a page at `resources/js/pages/auth/register.tsx` (can recover from git history) updating it to use the new names.
+3. Run `npm run build` to regenerate Wayfinder helpers.
+
+### Follow-Up Suggestions
+
+- Add a lightweight test asserting that a GET to `/bo/login` succeeds and `/login` 404s to guard against accidental Fortify view re-enablement.
+- Consider a Pest test verifying each `mfa.*` route is authenticated + guarded by `ensureUserIsActive`.
+
+---
