@@ -27,7 +27,7 @@ Each prompt is designed to be **copy-pasted directly into an LLM** (Claude, Chat
 ### Prompt 1.1: Install Required Packages
 
 ```
-I have a fresh Laravel 12 project with React and Vite already set up.
+I have a fresh Laravel 11 project with React and Vite already set up.
 
 Install and configure these packages:
 
@@ -60,6 +60,7 @@ Requirements:
 - Add proper indexes
 
 Also create:
+- A seeder that creates a default "webmaster" user (email: webmaster@cms.local, password: password)
 - The User model with proper fillable fields, casts, and soft deletes trait
 
 Provide complete migration file and User model code.
@@ -214,6 +215,10 @@ Example:
 DataType::SHORT_TEXT->label() // "Short Text (max 256 chars)"
 DataType::SHORT_TEXT->validationRules() // ['string', 'max:256']
 DataType::SHORT_TEXT->icon() // "Type"
+
+DataType::COMPONENT->label() // "Component Reference"
+DataType::COMPONENT->validationRules() // ['exists:components,id']
+DataType::COMPONENT->icon() // "Box"
 
 Provide complete enum code with all methods implemented.
 ```
@@ -379,10 +384,18 @@ Create these components using shadcn/ui:
    - Use shadcn Switch component
    - Label with ON/OFF indicator
 
+5. resources/js/Components/Forms/DataTypeFields/ComponentSelector.jsx
+   Props: field, value, onChange, error, components (array)
+   - Dropdown to select a component
+   - Shows component name and description
+   - Single select (returns component ID)
+   - Search/filter components
+   - Shows component preview on hover
+
 Install required packages:
 npm install @tiptap/react @tiptap/starter-kit date-fns
 
-Provide complete code for all four components with proper TypeScript types if possible.
+Provide complete code for all five components with proper TypeScript types if possible.
 ```
 
 ---
@@ -425,6 +438,8 @@ Create these components:
    - Load and display collection items
    - Single or multiple select based on field.config
    - Search/filter items
+
+Note: ComponentSelector was already created in Part 1.
 
 Install: npm install @dnd-kit/core @dnd-kit/sortable
 
@@ -533,8 +548,18 @@ Create resources/js/Pages/Collections/components/FieldBuilder.jsx:
 
 Create resources/js/Components/Forms/DataTypeSelector.jsx:
 
-- Dropdown showing all 8 data types with icons
+- Dropdown showing all 9 data types with icons:
+    - Short Text (Type icon)
+    - Long Text (AlignLeft icon)
+    - Date (Calendar icon)
+    - Boolean (ToggleLeft icon)
+    - Image (Image icon)
+    - File (File icon)
+    - List (List icon)
+    - Collection (Database icon)
+    - Component (Box icon)
 - Type descriptions on hover
+- Color-coded by category
 
 Form validation:
 
@@ -619,13 +644,30 @@ Create resources/js/Pages/Collections/Items/Create.jsx and Edit.jsx:
 - Dynamic form generation based on collection.fields
 - Render appropriate input component for each field type:
     ```jsx
-    switch (field.data_type) {
-        case 'short_text':
-            return <ShortTextInput />;
-        case 'text':
-            return <RichTextEditor />;
-        // ... etc
-    }
+    const renderField = (field) => {
+        switch (field.data_type) {
+            case 'short_text':
+                return <ShortTextInput {...fieldProps} />;
+            case 'text':
+                return <RichTextEditor {...fieldProps} />;
+            case 'date':
+                return <DatePicker {...fieldProps} />;
+            case 'boolean':
+                return <BooleanToggle {...fieldProps} />;
+            case 'image':
+                return <ImageUploader {...fieldProps} />;
+            case 'file':
+                return <FileUploader {...fieldProps} />;
+            case 'list':
+                return <ListBuilder {...fieldProps} />;
+            case 'collection':
+                return <CollectionSelector {...fieldProps} />;
+            case 'component':
+                return <ComponentSelector {...fieldProps} />;
+            default:
+                return null;
+        }
+    };
     ```
 - Form layout: 2 columns on desktop, 1 on mobile
 - Published toggle
@@ -636,6 +678,7 @@ Create resources/js/Pages/Collections/Items/components/DynamicForm.jsx:
 - Reusable dynamic form renderer
 - Field type switcher
 - Validation handling
+- Fetch components list for ComponentSelector fields
 
 Use @dnd-kit for reordering.
 
@@ -735,28 +778,82 @@ Create resources/js/Pages/Components/Create.jsx and Edit.jsx:
 
 Create resources/js/Pages/Components/components/FieldPalette.jsx:
 
-- List of 8 data types as draggable cards
+- List of 9 data types as draggable cards
 - Each shows: Icon, Name, Description
 - Drag to canvas to add field
-- Grouped by category (Text, Media, Data, Relationships)
+- Grouped by category:
+    - Text: Short Text, Long Text
+    - Media: Image, File
+    - Data: Date, Boolean
+    - Relationships: List, Collection, Component
 - Search filter
 
 Data types array:
 
 ```jsx
 const fieldTypes = [
-    { type: 'short_text', icon: 'Type', label: 'Short Text', color: 'blue' },
-    { type: 'text', icon: 'AlignLeft', label: 'Long Text', color: 'purple' },
-    { type: 'date', icon: 'Calendar', label: 'Date', color: 'green' },
-    { type: 'boolean', icon: 'ToggleLeft', label: 'Boolean', color: 'yellow' },
-    { type: 'image', icon: 'Image', label: 'Image', color: 'pink' },
-    { type: 'file', icon: 'File', label: 'File', color: 'orange' },
-    { type: 'list', icon: 'List', label: 'List', color: 'indigo' },
+    {
+        type: 'short_text',
+        icon: 'Type',
+        label: 'Short Text',
+        color: 'blue',
+        category: 'text',
+    },
+    {
+        type: 'text',
+        icon: 'AlignLeft',
+        label: 'Long Text',
+        color: 'purple',
+        category: 'text',
+    },
+    {
+        type: 'date',
+        icon: 'Calendar',
+        label: 'Date',
+        color: 'green',
+        category: 'data',
+    },
+    {
+        type: 'boolean',
+        icon: 'ToggleLeft',
+        label: 'Boolean',
+        color: 'yellow',
+        category: 'data',
+    },
+    {
+        type: 'image',
+        icon: 'Image',
+        label: 'Image',
+        color: 'pink',
+        category: 'media',
+    },
+    {
+        type: 'file',
+        icon: 'File',
+        label: 'File',
+        color: 'orange',
+        category: 'media',
+    },
+    {
+        type: 'list',
+        icon: 'List',
+        label: 'List',
+        color: 'indigo',
+        category: 'relationships',
+    },
     {
         type: 'collection',
         icon: 'Database',
         label: 'Collection',
         color: 'teal',
+        category: 'relationships',
+    },
+    {
+        type: 'component',
+        icon: 'Box',
+        label: 'Component',
+        color: 'violet',
+        category: 'relationships',
     },
 ];
 ```
@@ -2310,3 +2407,24 @@ Create LAUNCH_CHECKLIST.md:
 - [ ] Deploy to production!
 
 Review all code, run all tests, and ensure everything is working perfectly before launch.
+
+```
+
+---
+
+## ✅ YOU'RE DONE!
+
+You now have **complete, copy-paste-ready prompts** for an LLM to build your entire headless CMS.
+
+### How to Use:
+1. Copy a prompt
+2. Paste into Claude/ChatGPT/Cursor
+3. Review generated code
+4. Paste into your project
+5. Test it
+6. Move to next prompt
+
+**Total: ~60 prompts to build the complete system**
+
+Good luck! 🚀
+```

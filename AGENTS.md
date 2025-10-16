@@ -18,8 +18,8 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/prompts (PROMPTS) - v0
 - laravel/sanctum (SANCTUM) - v4
 - laravel/wayfinder (WAYFINDER) - v0
-- laravel/mcp (MCP) - v0
 - laravel/pint (PINT) - v1
+- laravel/sail (SAIL) - v1
 - pestphp/pest (PEST) - v4
 - phpunit/phpunit (PHPUNIT) - v12
 - @inertiajs/react (INERTIA) - v2
@@ -307,7 +307,7 @@ Route::get('/users', function () {
   it('returns all', function () {
   $response = $this->postJson('/api/docs', []);
 
-              $response->assertSuccessful();
+        $response->assertSuccessful();
 
     });
     </code-snippet>
@@ -344,6 +344,9 @@ it('has emails', function (string $email) {
 
 - You can use Laravel features like `Event::fake()`, `assertAuthenticated()`, and model factories within Pest v4 browser tests, as well as `RefreshDatabase` (when needed) to ensure a clean state for each test.
 - Interact with the page (click, type, scroll, select, submit, drag-and-drop, touch gestures, etc.) when appropriate to complete the test.
+- If requested, test on multiple browsers (Chrome, Firefox, Safari).
+- If requested, test on different devices and viewports (like iPhone 14 Pro, tablets, or custom breakpoints).
+- Switch color schemes (light/dark mode) when appropriate.
 - Take screenshots or pause tests for debugging when appropriate.
 
 ### Example Tests
@@ -397,7 +400,6 @@ import { Link } from '@inertiajs/react'
 import { Form } from '@inertiajs/react'
 
 export default () => (
-
 <Form action="/users" method="post">
 {({
 errors,
@@ -440,13 +442,13 @@ defaults
 
 - When listing items, use gap utilities for spacing, don't use margins.
 
-            <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
-                <div class="flex gap-8">
-                    <div>Superior</div>
-                    <div>Michigan</div>
-                    <div>Erie</div>
-                </div>
-            </code-snippet>
+      <code-snippet name="Valid Flex Gap Spacing Example" lang="html">
+          <div class="flex gap-8">
+              <div>Superior</div>
+              <div>Michigan</div>
+              <div>Erie</div>
+          </div>
+      </code-snippet>
 
 ### Dark Mode
 
@@ -493,194 +495,3 @@ defaults
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
 - Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific filename or filter.
   </laravel-boost-guidelines>
-
-# Project Specific
-
-## 2025-10-09 — Headless CMS User System Enhancements
-
-- Extended `database/migrations/0001_01_01_000000_create_users_table.php` to add MFA and security auditing fields (`is_mfa_enabled`, `mfa_secret`, `mfa_backup_codes`, `is_active`, `blocked_at`, `blocked_reason`, `last_login_at`, `last_login_ip`), indexes, and soft deletes.
-- Updated `app/Models/User.php` with matching fillable attributes, hidden sensitive fields, boolean/array/datetime casts, and the `SoftDeletes` trait.
-- Recorded required setup commands for the Laravel 12 + React stack:
-    - Composer packages: Sanctum, Spatie Permission, Pragmarx Google2FA, Intervention Image.
-    - NPM packages and initialization for Tailwind + shadcn/ui.
-    - Artisan vendor publish commands and migration run.
-    - `.env` variables for Sanctum, sessions, Google2FA, and image driver.
-- Provided finalized `vite.config.ts` configuration tailored for React, Tailwind, Wayfinder, and HMR settings.
-
-## 2025-10-10 — Laravel Authentication System with MFA Support
-
-- **AuthController** (`app/Http/Controllers/Auth/AuthController.php`):
-    - Implemented `login` with validation, rate limiting (5 attempts per minute), credential checking, last login timestamp & IP storage, and JSON success response.
-    - Implemented `logout` with session invalidation and JSON response.
-    - Added `showLogin` placeholder returning a JSON message.
-    - Added helper methods `ensureIsNotRateLimited` and `throttleKey` for rate limiting logic.
-
-- **MfaController** (`app/Http/Controllers/Auth/MfaController.php`):
-    - `enableMfa`: Generates a new Google2FA secret (or reuses existing), encrypts it, and returns a QR code URL for the authenticator app.
-    - `verifyAndEnableMfa`: Validates the TOTP code, marks MFA as confirmed, creates 10 hashed backup codes, stores them encrypted, and returns a success message.
-    - `disableMfa`: Clears MFA secret, backup codes, and confirmation timestamp.
-    - `verifyMfa`: Checks supplied code against hashed backup codes (consuming a code on success) or validates the TOTP code; returns appropriate JSON response.
-
-- **User Model** (`app/Models/User.php`):
-    - Added `two_factor_secret` and `two_factor_recovery_codes` to `$fillable`.
-    - Hid these fields in `$hidden`.
-    - Cast `two_factor_recovery_codes` to `array` for automatic JSON handling.
-
-- **Middleware**:
-    - Created `app/Http/Middleware/Authenticate.php` (standard Laravel authentication middleware).
-    - Updated `app/Http/Middleware/EnsureUserIsActive.php` to check the `is_active` flag and block inactive users.
-
-- **Kernel** (`app/Http/Kernel.php`):
-    - Registered route middleware `'ensureUserIsActive' => \App\Http\Middleware\EnsureUserIsActive::class`.
-
-- **Routes** (`routes/web.php`):
-    - Added POST `/login` and `/logout` endpoints using `AuthController`.
-    - Added MFA routes (`/mfa/enable`, `/mfa/verify-enable`, `/mfa/disable`, `/mfa/verify`) protected by `auth`, `verified`, and `ensureUserIsActive` middleware.
-    - Fixed duplicate Inertia import.
-
-- **Integration**:
-    - Utilized `pragmarx/google2fa` for TOTP generation and verification.
-    - All endpoints return JSON responses with proper validation and error handling, suitable for API consumption.
-
-This documentation provides a concise source of knowledge for the implemented authentication and MFA system, making it easy to reference and maintain.
-
-## [2025-10-09] Admin Route Refactor
-
-- All admin pages and endpoints are now under the `/bo` slug.
-- Updated `routes/web.php`:
-    - Wrapped dashboard and MFA routes with `Route::prefix('bo')`.
-    - All admin URLs are now `/bo/dashboard`, `/bo/mfa/enable`, etc.
-- No frontend `.tsx` files required changes (no hardcoded admin URLs found).
-- Login and logout endpoints remain at `/bo` and `/logout`.
-
-**Tested:**
-
-- Admin dashboard and MFA endpoints are accessible only under `/bo`.
-
----
-
-**Summary of Project Organization and Changes**
-
-- All admin functionality is now grouped under the `/bo` prefix for improved separation.
-- Dashboard and MFA endpoints are protected by authentication and verification middleware.
-- Authentication endpoints (`/bo`, `/logout`) are available for login/logout.
-- No hardcoded admin URLs in frontend code, so navigation is handled by backend route changes.
-- This file will continue to track all major organizational and route changes for the project.
-
----
-
-## [2025-10-09] Login Entry Relocation
-
-- Added a redirect so `/bo` forwards to the `login` route, serving `/bo/login`.
-- Disabled Fortify’s built-in view routes (`config/fortify.php` → `'views' => false`) to ensure `/login` is no longer available.
-- Registered a custom Inertia login view via `Fortify::loginView()` so `/bo/login` renders `resources/js/pages/auth/login.tsx`.
-
-**Status:**
-
-- `/bo/login` renders the Inertia login page.
-- `/login` now returns a 404 because Fortify view routes are disabled.
-
-## 2025-10-11 — Route Name De-duplication & Registration Removal
-
-### Summary
-
-Resolved Vite / Wayfinder build failures caused by duplicate generated TypeScript exports stemming from reused Laravel route names. Removed unused user registration UI since registration is disabled. Standardized MFA route names to prevent future collisions.
-
-### Changes
-
-- Removed `resources/js/pages/auth/register.tsx` (registration page) and all references (`register()` helper removed from `welcome.tsx` header and login page footer message simplified).
-- Left Fortify registration routes commented out (no backend exposure) keeping prior intent explicit.
-- Renamed MFA route names in `routes/web.php` from legacy `two-factor.*` style (previous interim naming) to a concise, unique `mfa.*` namespace:
-    - `mfa.enable`
-    - `mfa.enable-for-user`
-    - `mfa.confirm` (was `two-factor.confirm` / `two-factor.verify-enable` previously)
-    - `mfa.disable`
-    - `mfa.login` (TOTP / backup code verification during login)
-- Renamed POST password confirmation route from `password.confirmation` to `password.confirmation.store` to avoid clashing with the GET `password.confirm` route when Wayfinder generated helpers (previous build error: duplicate `confirmation` / `store` exports in generated files).
-
-### Rationale
-
-Wayfinder generates TypeScript constants per route name. When two Laravel routes share the same name (even with different methods or URLs), the emitted TS module re-declares an exported constant (e.g., `confirmation`, `store`, `enable`, `confirm`), causing esbuild compilation errors. By ensuring uniqueness across all named routes (especially GET vs POST pairs & parallel Fortify/MFA endpoints), builds now succeed.
-
-### Result
-
-- `npm run build` now completes successfully (no duplicate export errors).
-- Frontend no longer imports non-existent registration route helpers.
-- MFA naming is clearer (`mfa.*`) aligning with actual endpoint path `/bo/mfa/...`.
-
-### How To Reintroduce Registration (If Needed Later)
-
-1. Uncomment the registration routes in `routes/auth.php` (GET & POST) and assign distinct names (e.g., `register.show`, `register.store`).
-2. Restore a page at `resources/js/pages/auth/register.tsx` (can recover from git history) updating it to use the new names.
-3. Run `npm run build` to regenerate Wayfinder helpers.
-
-### Follow-Up Suggestions
-
-- Add a lightweight test asserting that a GET to `/bo/login` succeeds and `/login` 404s to guard against accidental Fortify view re-enablement.
-- Consider a Pest test verifying each `mfa.*` route is authenticated + guarded by `ensureUserIsActive`.
-
----
-
-## Vite / HMR — Frontend dev tips
-
-- Start dev server:
-    - Command: `npm run dev`
-    - Confirms: Vite prints "Local: http://localhost:5173/" when ready.
-
-- Common failure: "server connection lost" / ERR_CONNECTION_REFUSED
-    - Cause: Vite dev server not running, crashed, or bound to a different host (IPv6 vs IPv4).
-    - Quick fixes:
-        - Check the running dev terminal for errors and plugin build failures.
-        - Restart: stop the terminal and run `npm run dev` again.
-        - If browser console shows requests to `http://[::1]:5173`, try `http://localhost:5173` or force Vite host to `localhost` to avoid IPv6 resolution issues.
-        - To expose the dev server on the network, run `npm run dev -- --host` or set `server.host = '0.0.0.0'` in `vite.config.ts`.
-        - For custom local domains (e.g. `montedesantiago.test`), ensure `/etc/hosts` maps the domain to `127.0.0.1` (or the intended IP).
-
-- When dynamic imports fail (Inertia + Vite):
-    - Error: "Failed to fetch dynamically imported module" → Vite not reachable or port mismatch.
-    - Check `vite.config.ts` for `server.port` and ensure the app is connecting to the same port.
-    - Ensure Wayfinder/Vite plugin is generating correct resource paths for `/resources/js/...`.
-
-- HMR disconnects repeatedly:
-    - Inspect for port conflicts or firewall/antivirus blocking port 5173.
-    - If using docker or remote environments, ensure proper host binding and forwarded ports.
-
-- Logging & debugging:
-    - Copy terminal output and browser console stack traces when reporting issues.
-    - If the dev server crashes, run `npm run dev` again and examine the full stack trace.
-
-- Recommended additions to this repo docs:
-    - Node & npm version recommended for development (e.g., Node >= 18, npm >= 9).
-    - Short reproduction steps for Vite-related issues (start server, open localhost:5173, reproduce and capture logs).
-    - Note about Wayfinder route name uniqueness to avoid generated TS duplicate export errors.
-
-- Repro / report checklist:
-    1. Start `npm run dev`.
-    2. Open `http://localhost:5173/` to confirm server responds.
-    3. Reproduce error in browser, copy dev terminal output and browser console stack trace.
-    4. File an issue including the above plus `vite.config.ts` and `package.json` dev scripts.
-
-## DataType enum (app/Enums/DataType.php)
-
-- Purpose: Canonical server-side enum that defines CMS field types and provides UI metadata and validation helpers.
-- Location: `app/Enums/DataType.php`
-- Notes:
-    - Cases: `SHORT_TEXT`, `TEXT`, `DATE`, `BOOLEAN`, `IMAGE`, `FILE`, `LIST`, `COLLECTION`, `COMPONENT`
-    - Methods:
-        - `label()` — returns a human-friendly label (e.g., `Short Text (max 256 chars)`).
-        - `validationRules()` — returns a Laravel validation rules array for that type (e.g., `['string','max:256']`).
-        - `icon()` — returns a `lucide-react` icon name for UI use (e.g., `Type`).
-    - Intended usage:
-        - Use the enum server-side for validation and to drive admin UI choices.
-        - If the frontend needs to render icons/labels, export a small JS mapping (example: `resources/js/lib/data-types.ts`) that mirrors `DataType::icon()` / `label()` outputs.
-    - Implementation reminders:
-        - Validation rules included are conservative defaults — adjust file/image size limits and collection reference types per project needs.
-        - Keep business logic and authorization on the server (middleware). The enum is a data/contract helper, not an authorization mechanism.
-
-</content>
-<task_progress>
-- [x] Analyze requirement for AGENTS.md update
-- [x] Append DataType enum notes to AGENTS.md
-- [ ] Optional: add frontend JS mapping for DataType
-- [ ] Optional: add unit tests for DataType methods
-</task_progress>
