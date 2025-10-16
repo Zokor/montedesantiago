@@ -18,6 +18,7 @@ Document architectural reasoning and tradeoffs here.
 - Laravel project currently stops at partial migrations; collections/components tables lack activation flags and soft deletes, blocking parity with vanilla archival features.
 - Decided to organise domain layer into models + services (ComponentBuilder, Versioning, Slug) so controllers stay thin and reusable for both Inertia and API endpoints.
 - Headless toggle will live in settings table with middleware guarding `/api/v1/*`, enabling enterprise deployments to disable public API quickly.
+- Implemented settings table + factories today; future step is to seed defaults for headless mode, draft preview, and media settings.
 
 ---
 

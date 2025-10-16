@@ -11,18 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('collection_items', function (Blueprint $table) {
+        Schema::create('page_components', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('collection_id')->constrained('collections')->cascadeOnDelete();
+            $table->foreignId('page_id')->constrained('pages')->cascadeOnDelete();
+            $table->foreignId('component_id')->constrained('components')->restrictOnDelete();
             $table->json('data');
-            $table->boolean('is_published')->default(false);
             $table->unsignedInteger('order')->default(0);
             $table->timestamps();
-            $table->softDeletes();
 
-            // Indexes
-            $table->index(['collection_id', 'is_published']);
-            $table->index(['collection_id', 'order']);
+            $table->index(['page_id', 'order']);
         });
     }
 
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('collection_items');
+        Schema::dropIfExists('page_components');
     }
 };

@@ -18,8 +18,11 @@ enum DataType: string
 {
     case SHORT_TEXT = 'short_text';
     case TEXT = 'text';
+    case NUMBER = 'number';
     case DATE = 'date';
     case BOOLEAN = 'boolean';
+    case MARKDOWN = 'markdown';
+    case SELECT = 'select';
     case IMAGE = 'image';
     case FILE = 'file';
     case LIST = 'list';
@@ -34,8 +37,11 @@ enum DataType: string
         return match ($this) {
             self::SHORT_TEXT => 'Short Text (max 256 chars)',
             self::TEXT => 'Long Text',
+            self::NUMBER => 'Number',
             self::DATE => 'Date',
             self::BOOLEAN => 'Boolean',
+            self::MARKDOWN => 'Markdown',
+            self::SELECT => 'Select',
             self::IMAGE => 'Image',
             self::FILE => 'File',
             self::LIST => 'List (array)',
@@ -57,8 +63,11 @@ enum DataType: string
         return match ($this) {
             self::SHORT_TEXT => ['string', 'max:256'],
             self::TEXT => ['string'],
+            self::NUMBER => ['numeric'],
             self::DATE => ['date'],
             self::BOOLEAN => ['boolean'],
+            self::MARKDOWN => ['string'],
+            self::SELECT => ['string'],
             self::IMAGE => ['image', 'max:10240'], // max 10MB by default
             self::FILE => ['file', 'max:10240'],   // max 10MB by default
             self::LIST => ['array'],
@@ -77,8 +86,11 @@ enum DataType: string
         return match ($this) {
             self::SHORT_TEXT => 'Type',
             self::TEXT => 'FileText',
+            self::NUMBER => 'Hash',
             self::DATE => 'Calendar',
             self::BOOLEAN => 'ToggleLeft',
+            self::MARKDOWN => 'TextQuote',
+            self::SELECT => 'ListFilter',
             self::IMAGE => 'Image',
             self::FILE => 'File',
             self::LIST => 'List',

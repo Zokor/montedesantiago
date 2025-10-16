@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('collection_fields', function (Blueprint $table) {
+        Schema::create('component_fields', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('collection_id')->constrained('collections')->cascadeOnDelete();
+            $table->foreignId('component_id')->constrained('components')->cascadeOnDelete();
             $table->string('name');
             $table->string('slug');
             $table->string('data_type');
@@ -24,9 +24,8 @@ return new class extends Migration
             $table->unsignedInteger('order')->default(0);
             $table->timestamps();
 
-            // Constraints & indexes
-            $table->unique(['collection_id', 'slug']);
-            $table->index(['collection_id', 'order']);
+            $table->unique(['component_id', 'slug']);
+            $table->index(['component_id', 'order']);
             $table->index('data_type');
         });
     }
@@ -36,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('collection_fields');
+        Schema::dropIfExists('component_fields');
     }
 };

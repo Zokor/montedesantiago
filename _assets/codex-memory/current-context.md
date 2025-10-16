@@ -13,10 +13,10 @@ Architecture review complete. Ready to execute schema completion and scaffold co
 
 ## 🎯 Active Objectives
 
-- [ ] Finish CMS migrations (`collections`, `component_fields`, `page_components`, `page_versions`, `media`, `settings`) and rerun schema tests.
-- [ ] Generate Eloquent models/services (ComponentBuilder, Slug, Versioning, ConditionalVisibility) with Pest coverage.
+- [ ] Wire admin/API controllers and resources for collections, components, pages, media, and settings.
 - [ ] Design React builder workspace (palette/canvas/inspector) and DataType form components leveraging shadcn + @dnd-kit.
-- [ ] Stand up headless API layer (`/api/v1`) guarded by new feature flag.
+- [ ] Stand up headless API layer (`/api/v1`) guarded by new feature flag and integrate with settings toggle.
+- [ ] Author Pest tests covering migrations, services (slug/builder/versioning/visibility), and model relationships.
 
 ---
 

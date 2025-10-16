@@ -20,7 +20,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            // Indexes
             $table->index('slug');
             $table->index('is_active');
         });
@@ -32,3 +31,5 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('components');
+    }
+};
