@@ -13,8 +13,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('bo/login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
-    Route::post('bo/logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
+    Route::post('bo/login', [AuthenticatedSessionController::class, 'store'])
+        ->middleware('throttle:login')
+        ->name('login.store');
 
     // Route::get('register', [RegisteredUserController::class, 'create'])
     //     ->name('register');
@@ -54,6 +55,5 @@ Route::middleware('auth')->group(function () {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])
         ->name('password.confirmation.store');
 
-    // Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-    //     ->name('logout');
+    // Logout handled by Fortify default route (prefix configured in config/fortify.php)
 });

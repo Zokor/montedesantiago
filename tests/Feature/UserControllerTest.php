@@ -25,7 +25,7 @@ it('lists users with filters', function () {
 
     $response = $this
         ->actingAs($this->admin)
-        ->get('/bo/users?status=active');
+        ->getJson('/bo/users?status=active');
 
     $response->assertOk();
 });

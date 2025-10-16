@@ -5,7 +5,6 @@ use App\Http\Controllers\Admin\ComponentController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\MfaController;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
@@ -27,8 +26,6 @@ require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
 // Authentication endpoints
-Route::post('bo', [AuthController::class, 'login'])->name('auth.login');
-Route::post('logout', [AuthController::class, 'logout'])->name('auth.logout');
 
 // MFA endpoints (protected by auth and active-user check)
 Route::prefix('bo')->middleware(['auth', 'verified', EnsureUserIsActive::class])->group(function () {

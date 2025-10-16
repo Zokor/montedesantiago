@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
+use Inertia\Inertia;
 
 class AuthController extends Controller
 {
@@ -25,7 +26,6 @@ class AuthController extends Controller
     /**
      * Handle a login request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      *
      * @throws \Illuminate\Validation\ValidationException
@@ -39,7 +39,7 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey($request), 60);
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
@@ -62,7 +62,6 @@ class AuthController extends Controller
     /**
      * Handle a logout request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request)
@@ -71,19 +70,26 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Logged out successfully.']);
+        if ($request->inertia()) {
+            return Inertia::location(route('login'));
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Logged out successfully.']);
+        }
+
+        return redirect()->route('login');
     }
 
     /**
      * Ensure the login request is not rate limited.
      *
-     * @param  \Illuminate\Http\Request  $request
      *
      * @throws \Illuminate\Validation\ValidationException
      */
     protected function ensureIsNotRateLimited(Request $request)
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey($request), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey($request), 5)) {
             return;
         }
 
@@ -97,11 +103,10 @@ class AuthController extends Controller
     /**
      * Build the rate limiter key.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return string
      */
     protected function throttleKey(Request $request)
     {
-        return strtolower($request->input('email')) . '|' . $request->ip();
+        return strtolower($request->input('email')).'|'.$request->ip();
     }
 }

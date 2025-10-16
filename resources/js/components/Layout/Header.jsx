@@ -1,40 +1,20 @@
 import React, { useState } from 'react';
-import { Link } from '@inertiajs/react';
-import {
-    Menu,
-    Search,
-    User,
-    Settings,
-    Shield,
-    LogOut,
-    Menu as MenuIcon
-} from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { Menu, Search, Menu as MenuIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { UserMenuContent } from '@/components/user-menu-content';
 
 export function Header({ title, breadcrumbs = [], onMenuClick }) {
     const [searchQuery, setSearchQuery] = useState('');
-
-    // Mock user data - replace with actual user context
-    const user = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        avatar: null,
-    };
-
-    const handleLogout = () => {
-        // Implement logout logic
-        console.log('Logout clicked');
-    };
+    const { auth } = usePage().props;
+    const user = auth.user;
 
     return (
         <header className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -57,7 +37,7 @@ export function Header({ title, breadcrumbs = [], onMenuClick }) {
                                 <ol className="flex items-center space-x-2">
                                     <li>
                                         <Link
-                                            to="/bo/dashboard"
+                                            href="/bo/dashboard"
                                             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                                         >
                                             Dashboard
@@ -68,7 +48,7 @@ export function Header({ title, breadcrumbs = [], onMenuClick }) {
                                             <span className="text-gray-400 mx-2">/</span>
                                             {crumb.href ? (
                                                 <Link
-                                                    to={crumb.href}
+                                                    href={crumb.href}
                                                     className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                                                 >
                                                     {crumb.label}
@@ -118,55 +98,23 @@ export function Header({ title, breadcrumbs = [], onMenuClick }) {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                                {user.avatar ? (
+                                {user?.profile_photo_url ? (
                                     <img
                                         className="h-8 w-8 rounded-full"
-                                        src={user.avatar}
+                                        src={user.profile_photo_url}
                                         alt={user.name}
                                     />
                                 ) : (
                                     <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                                        <User className="h-4 w-4 text-white" />
+                                        <span className="text-sm font-semibold text-white">
+                                            {user?.name?.charAt(0) ?? '?'}
+                                        </span>
                                     </div>
                                 )}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="end" forceMount>
-                            <DropdownMenuLabel className="font-normal">
-                                <div className="flex flex-col space-y-1">
-                                    <p className="text-sm font-medium leading-none">{user.name}</p>
-                                    <p className="text-xs leading-none text-muted-foreground">
-                                        {user.email}
-                                    </p>
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                <Link href="/bo/profile" className="flex items-center">
-                                    <User className="mr-2 h-4 w-4" />
-                                    <span>Profile</span>
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href="/bo/settings" className="flex items-center">
-                                    <Settings className="mr-2 h-4 w-4" />
-                                    <span>Settings</span>
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href="/bo/profile/mfa" className="flex items-center">
-                                    <Shield className="mr-2 h-4 w-4" />
-                                    <span>MFA Setup</span>
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                                className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
-                                onClick={handleLogout}
-                            >
-                                <LogOut className="mr-2 h-4 w-4" />
-                                <span>Logout</span>
-                            </DropdownMenuItem>
+                            {user ? <UserMenuContent user={user} /> : <div className="p-4 text-sm">Signed out</div>}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

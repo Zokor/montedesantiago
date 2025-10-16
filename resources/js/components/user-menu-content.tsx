@@ -9,7 +9,7 @@ import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
 import { type User } from '@/types';
-import { Link, router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
 
 interface UserMenuContentProps {
@@ -21,7 +21,6 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
 
     const handleLogout = () => {
         cleanup();
-        router.flushAll();
     };
 
     return (
@@ -51,6 +50,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                 <Link
                     className="block w-full"
                     href={logout()}
+                    method="post"
                     as="button"
                     onClick={handleLogout}
                     data-test="logout-button"

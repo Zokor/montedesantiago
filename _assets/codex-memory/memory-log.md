@@ -109,3 +109,28 @@ _(Codex appends new entries here automatically or manually after each reasoning 
 **Next Steps:** Continue fleshing out pages/media UIs and password/MFA flows.
 
 ---
+### [2025-10-16 21:40]
+
+**Task:** Fixed logout flow for invited users
+**Outcome:** Logout route now redirects to the login page for non-JSON requests, and the user menu uses an Inertia POST link so sign-out works from the dropdown.
+**Next Steps:** Continue MFA/password tooling for user management.
+
+---
+### [2025-10-16 21:50]
+
+**Task:** Ensure logout redirects and protects admin routes when session ends
+**Outcome:** Updated logout response to send an Inertia location for SPA requests (and JSON/redirect otherwise). Logging out now returns to the login screen, and revisiting admin URLs while logged out triggers auth middleware as expected.
+
+---
+### [2025-10-16 22:05]
+
+**Task:** Consolidated auth routes for Inertia pages
+**Outcome:** Logout now uses Fortify's authenticated POST `/logout` route, login form posts to `/bo/login` handled by Fortify's `AuthenticatedSessionController::store`, and the duplicate `AuthController` routes were removed.
+
+---
+### [2025-10-16 22:25]
+
+**Task:** Consolidated Fortify routes and fixed duplicate logout exports
+**Outcome:** Relied on Fortify's `bo/logout` route exclusively, provided a custom logout response (`InertiaLogoutResponse`), and adjusted tests to consume JSON so they bypass Vite chunk loading. Wayfinder no longer generates duplicate logout exports, and npm dev runs without errors.
+
+---
