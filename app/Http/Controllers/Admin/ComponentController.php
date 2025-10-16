@@ -47,22 +47,22 @@ class ComponentController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        if ($request->header('X-Inertia')) {
-            $payload = ComponentResource::collection($components)
-                ->response($request)
-                ->getData(true);
+        $payload = ComponentResource::collection($components)
+            ->response($request)
+            ->getData(true);
 
-            return Inertia::render('components/index', [
-                'components' => $payload,
-                'filters' => [
-                    'search' => $search->toString(),
-                    'sort' => $sort,
-                    'direction' => $direction,
-                ],
-            ]);
+        if ($request->wantsJson()) {
+            return response()->json($payload);
         }
 
-        return ComponentResource::collection($components);
+        return Inertia::render('components/index', [
+            'components' => $payload,
+            'filters' => [
+                'search' => $search->toString(),
+                'sort' => $sort,
+                'direction' => $direction,
+            ],
+        ]);
     }
 
     /**

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\ComponentController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\MfaController;
 use App\Http\Middleware\EnsureUserIsActive;
@@ -47,4 +48,8 @@ Route::prefix('bo')->middleware(['auth', 'verified', EnsureUserIsActive::class])
     Route::apiResource('collections', CollectionController::class)->except(['create', 'edit']);
     Route::apiResource('pages', PageController::class)->except(['create', 'edit']);
     Route::apiResource('media', MediaController::class)->except(['create', 'edit', 'update']);
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
+    Route::post('users', [UserController::class, 'store'])->name('users.store');
+    Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });

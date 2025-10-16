@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class MediaController extends Controller
 {
@@ -40,7 +41,23 @@ class MediaController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return MediaResource::collection($media);
+        $payload = MediaResource::collection($media)
+            ->response($request)
+            ->getData(true);
+
+        if ($request->wantsJson()) {
+            return response()->json($payload);
+        }
+
+        return Inertia::render('media/index', [
+            'media' => $payload,
+            'filters' => [
+                'search' => $search->toString(),
+                'folder' => $folder,
+                'mime' => $mime,
+            ],
+            'showPagination' => $media->total() > $media->perPage(),
+        ]);
     }
 
     /**

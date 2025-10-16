@@ -81,3 +81,31 @@ _(Codex appends new entries here automatically or manually after each reasoning 
 **Next Steps:** Develop data import routines from vanilla CMS and expand UI for collections/pages alongside frontend tests.
 
 ---
+### [2025-10-16 20:40]
+
+**Task:** Connected dashboard and listing screens to admin layout
+**Outcome:** Dashboard now uses `AdminLayout` and provides quick-start content; components and collections routes return Inertia views with table listings and home navigation displays full sidebar.
+**Next Steps:** Build remaining admin UI for pages/media and start import tooling.
+
+---
+### [2025-10-16 20:52]
+
+**Task:** Hide unfinished Users menu entry
+**Outcome:** Removed `/bo/users` link from the sidebar to prevent 404s until the user management UI is implemented.
+**Next Steps:** Build users module later; continue with collections/pages/media features first.
+
+---
+### [2025-10-16 21:05]
+
+**Task:** Built users administration listing
+**Outcome:** Restored Users navigation, added UserController with Inertia listing + status toggle, created `users/index.tsx`, and added feature tests for listing/updating; sidebar now links to working user management UI.
+**Next Steps:** Continue with import tooling and additional admin flows.
+
+---
+### [2025-10-16 21:25]
+
+**Task:** Fixed direct navigation on admin routes
+**Outcome:** Updated collection, component, page, media, and user controllers to detect JSON requests and fall back to Inertia views; added placeholder Inertia pages for pages/media. Direct URL visits now render the full admin UI.
+**Next Steps:** Continue fleshing out pages/media UIs and password/MFA flows.
+
+---

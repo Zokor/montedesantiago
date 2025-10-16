@@ -53,7 +53,21 @@ class PageController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return PageResource::collection($pages);
+        $payload = PageResource::collection($pages)
+            ->response($request)
+            ->getData(true);
+
+        if ($request->wantsJson()) {
+            return response()->json($payload);
+        }
+
+        return Inertia::render('pages/index', [
+            'pages' => $payload,
+            'filters' => [
+                'search' => $search->toString(),
+                'status' => $status,
+            ],
+        ]);
     }
 
     /**

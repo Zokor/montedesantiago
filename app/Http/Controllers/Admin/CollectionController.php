@@ -49,23 +49,23 @@ class CollectionController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        if ($request->header('X-Inertia')) {
-            $payload = CollectionResource::collection($collections)
-                ->response($request)
-                ->getData(true);
+        $payload = CollectionResource::collection($collections)
+            ->response($request)
+            ->getData(true);
 
-            return Inertia::render('collections/index', [
-                'collections' => $payload,
-                'filters' => [
-                    'search' => $search->toString(),
-                    'status' => $status,
-                    'sort' => $sort,
-                    'direction' => $direction,
-                ],
-            ]);
+        if ($request->wantsJson()) {
+            return response()->json($payload);
         }
 
-        return CollectionResource::collection($collections);
+        return Inertia::render('collections/index', [
+            'collections' => $payload,
+            'filters' => [
+                'search' => $search->toString(),
+                'status' => $status,
+                'sort' => $sort,
+                'direction' => $direction,
+            ],
+        ]);
     }
 
     /**
