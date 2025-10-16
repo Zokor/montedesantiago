@@ -7,33 +7,30 @@ Codex should read this file at the beginning of each session to re-establish sta
 
 ## 🧩 Current Stage
 
-Describe the current phase of planning or development.
-
-> Example:
-> Refining Laravel CMS structure after reviewing vanilla CMS. Currently defining migration plan and field type mapping.
+Architecture review complete. Ready to execute schema completion and scaffold core CMS modules (models, services, builder UI) following the new refinement plan.
 
 ---
 
 ## 🎯 Active Objectives
 
-- [ ] Verify all field types from vanilla CMS are supported in Laravel.
-- [ ] Review `/_assets/tasks/04-components.md` for completeness.
-- [ ] Ensure media upload supports drag-and-drop and multi-image handling.
-- [ ] Begin drafting `/_assets/laravel-refinement-plan/migration-steps.md`.
+- [ ] Finish CMS migrations (`collections`, `component_fields`, `page_components`, `page_versions`, `media`, `settings`) and rerun schema tests.
+- [ ] Generate Eloquent models/services (ComponentBuilder, Slug, Versioning, ConditionalVisibility) with Pest coverage.
+- [ ] Design React builder workspace (palette/canvas/inspector) and DataType form components leveraging shadcn + @dnd-kit.
+- [ ] Stand up headless API layer (`/api/v1`) guarded by new feature flag.
 
 ---
 
 ## ⚙️ Pending or Follow-up Actions
 
-- [ ] Compare Blade component mapping vs React component mapping.
-- [ ] Add markdown editor support to field types.
-- [ ] Review API toggle implementation for headless mode.
+- [ ] Map vanilla component data to new schema during import command development.
+- [ ] Plan Blade rendering layer that mirrors headless JSON schema for front-end parity.
+- [ ] Draft testing matrix (feature + browser tests) covering builder workflows and media uploads.
 
 ---
 
 ## 📎 References
 
-- Related planning file: `/_assets/tasks/05-pages-media-users.md`
+- Related planning files: `/_assets/tasks/04-components.md`, `/_assets/tasks/05-pages-media-users.md`
 - Last memory log entry: `/_assets/codex-memory/memory-log.md`
 - Current working branch: _(Codex can append branch info here if relevant)_
 

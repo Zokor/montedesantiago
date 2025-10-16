@@ -14,6 +14,11 @@ Document architectural reasoning and tradeoffs here.
 > - Vanilla CMS uses direct PHP templating; Laravel version moves toward Blade + Inertia.
 > - Decision: Retain Blade compatibility for server-side rendering, while exposing headless API for frontends.
 
+### [2025-10-16] Content Domain Assessment
+- Laravel project currently stops at partial migrations; collections/components tables lack activation flags and soft deletes, blocking parity with vanilla archival features.
+- Decided to organise domain layer into models + services (ComponentBuilder, Versioning, Slug) so controllers stay thin and reusable for both Inertia and API endpoints.
+- Headless toggle will live in settings table with middleware guarding `/api/v1/*`, enabling enterprise deployments to disable public API quickly.
+
 ---
 
 ## 🧩 Concept Transfers from Vanilla to Laravel
@@ -21,6 +26,8 @@ Document architectural reasoning and tradeoffs here.
 - Component system concept: dynamic JSON schema per component type.
 - Field management logic: use normalized storage instead of serialized arrays.
 - Drag-and-drop ordering: leverage Vue/React drag API with Inertia bridge.
+- Conditional visibility rules from vanilla `component-builder-scripts.php` map nicely to a PHP service + React hook pair; plan to serialise rule groups alongside schema metadata.
+- Vanilla media library already stores derivative info; Laravel migration will track `metadata` JSON plus `folder`, enabling filters and future CDN integration.
 
 ---
 
@@ -29,6 +36,8 @@ Document architectural reasoning and tradeoffs here.
 - Markdown field types need dual-mode editor (plain + preview).
 - Image field UX: consider gallery picker with multi-upload.
 - Conditional logic fields must maintain reactive dependencies.
+- Builder workspace should follow three-panel layout (palette / canvas / inspector) with responsive fallback; shadcn `Sheet` component is a good fit for small screens.
+- Admin header currently uses hard-coded user info—needs Inertia shared props and proper logout route usage to avoid console warnings.
 
 ---
 
@@ -39,6 +48,7 @@ Document architectural reasoning and tradeoffs here.
 - Versioning and rollback per page.
 - Role-based permissions on component types.
 - Live preview integration using Inertia hot-reload.
+- Snapshot testing pipeline: export page JSON + rendered Blade HTML each release to guard against schema regressions.
 
 ---
 
