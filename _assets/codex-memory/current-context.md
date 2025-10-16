@@ -7,16 +7,17 @@ Codex should read this file at the beginning of each session to re-establish sta
 
 ## 🧩 Current Stage
 
-Architecture review complete. Ready to execute schema completion and scaffold core CMS modules (models, services, builder UI) following the new refinement plan.
+Architecture review complete. Backend and headless APIs plus component builder UI exist; upcoming work focuses on vanilla data import, enhanced frontend flows for collections/pages, and end-to-end testing.
 
 ---
 
 ## 🎯 Active Objectives
 
-- [ ] Wire admin/API controllers and resources for collections, components, pages, media, and settings.
-- [ ] Design React builder workspace (palette/canvas/inspector) and DataType form components leveraging shadcn + @dnd-kit.
-- [ ] Stand up headless API layer (`/api/v1`) guarded by new feature flag and integrate with settings toggle.
-- [ ] Author Pest tests covering migrations, services (slug/builder/versioning/visibility), and model relationships.
+- [x] Wire admin/API controllers and resources for components, collections, pages, media, and headless delivery.
+- [x] Design React builder workspace (palette/canvas/inspector) and DataType form components leveraging shadcn + @dnd-kit.
+- [ ] Deliver import routines / seeders to map vanilla CMS data into the new schema.
+- [ ] Author Pest tests covering remaining modules, services, and import routines (beyond current happy paths).
+- [ ] Extend frontend to manage collections/pages (list + edit) reusing new APIs.
 
 ---
 
@@ -25,6 +26,7 @@ Architecture review complete. Ready to execute schema completion and scaffold co
 - [ ] Map vanilla component data to new schema during import command development.
 - [ ] Plan Blade rendering layer that mirrors headless JSON schema for front-end parity.
 - [ ] Draft testing matrix (feature + browser tests) covering builder workflows and media uploads.
+- [ ] Expose version preview endpoints once frontend preview workflow is defined.
 
 ---
 

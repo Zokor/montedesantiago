@@ -19,6 +19,8 @@ Document architectural reasoning and tradeoffs here.
 - Decided to organise domain layer into models + services (ComponentBuilder, Versioning, Slug) so controllers stay thin and reusable for both Inertia and API endpoints.
 - Headless toggle will live in settings table with middleware guarding `/api/v1/*`, enabling enterprise deployments to disable public API quickly.
 - Implemented settings table + factories today; future step is to seed defaults for headless mode, draft preview, and media settings.
+- Component API now returns structured resources mirroring vanilla schema; duplication handled server-side to align with builder UX. Need equivalent service for collections next so list/detail flows match.
+- Collections API now mirrors vanilla definitions and blocks deletion when items exist. Next similar builder service required for page composition so admin UI can treat collections/pages sym sym.
 
 ---
 
@@ -54,3 +56,5 @@ Document architectural reasoning and tradeoffs here.
 ---
 
 _(Codex appends new sections as needed, referencing relevant tasks or commits.)_
+- Page API now snapshots versions automatically on create/update and guards homepage uniqueness; media endpoints handle storage abstraction with lightweight metadata. Next architectural focus: expose headless JSON endpoints and align React builder to new API contracts.
+- React builder workspace now mirrors vanilla UX: palette/sidebar/canvas/inspector, saving directly to `/bo/components`. Next UI step is extending similar patterns to collections/pages and adding live previews.

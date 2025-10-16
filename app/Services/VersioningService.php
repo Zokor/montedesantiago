@@ -174,7 +174,8 @@ class VersioningService
     {
         $versionIds = $page->versions()
             ->latest()
-            ->skip($this->retainedVersions)
+            ->get(['id'])
+            ->slice($this->retainedVersions)
             ->pluck('id');
 
         if ($versionIds->isNotEmpty()) {
