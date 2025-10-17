@@ -1,43 +1,35 @@
-import React, { useState } from 'react';
-import { Sidebar } from './Sidebar';
-import { Header } from './Header';
-import { cn } from '@/lib/utils';
+import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 
 export function AdminLayout({ children, title, breadcrumbs = [] }) {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const normalizedBreadcrumbs = (breadcrumbs ?? [])
+        .map((crumb) => {
+            if (crumb?.title) {
+                return { title: crumb.title, href: crumb.href };
+            }
+
+            return {
+                title: crumb?.label ?? '',
+                href: crumb?.href,
+            };
+        })
+        .filter((crumb) => Boolean(crumb.title));
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            {/* Mobile sidebar overlay */}
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
-
-            {/* Sidebar */}
-            <Sidebar
-                isOpen={sidebarOpen}
-                onClose={() => setSidebarOpen(false)}
-            />
-
-            {/* Main content */}
-            <div className="lg:pl-64">
-                {/* Header */}
-                <Header
-                    title={title}
-                    breadcrumbs={breadcrumbs}
-                    onMenuClick={() => setSidebarOpen(true)}
-                />
-
-                {/* Page content */}
-                <main className="py-6">
-                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <AppSidebarLayout breadcrumbs={normalizedBreadcrumbs}>
+            <div className="flex w-full flex-col gap-6 px-6 py-6">
+                {title ? (
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                            {title}
+                        </h1>
+                    </div>
+                ) : null}
+                <div className="flex-1">
+                    <div className="mx-auto w-full max-w-7xl">
                         {children}
                     </div>
-                </main>
+                </div>
             </div>
-        </div>
+        </AppSidebarLayout>
     );
 }
