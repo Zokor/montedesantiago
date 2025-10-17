@@ -75,6 +75,7 @@ export default function AppLogoIcon(props: AppLogoIconProps) {
                 className="cube middle secondColumnTop"
                 d="M29.0708 3L37.4973 10.0707L30.4266 18.4972L22.0001 11.4265L29.0708 3Z"
                 fill="black"
+                style={animate ? { transform: 'translateY(11px) translateX(-11px) rotate(320deg)' } : undefined}
             />
 
             <path
@@ -94,12 +95,14 @@ export default function AppLogoIcon(props: AppLogoIconProps) {
                 className="cube top thirdColumnTop"
                 d="M43 0H54V11H43V0Z"
                 fill="black"
+                style={animate ? { transform: 'translateY(16px) translateX(-17px) rotate(270deg)' } : undefined}
             />
 
             <path
                 className="cube bottom thirdColumnMiddle"
                 d="M39.4263 20L46.4969 28.4265L38.0704 35.4972L30.9998 27.0707L39.4263 20Z"
                 fill="black"
+                style={animate ? { transform: 'translateY(7px) translateX(-7px) rotate(310deg)' } : undefined}
             />
 
             <path
