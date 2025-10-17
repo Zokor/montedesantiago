@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Search, Menu as MenuIcon } from 'lucide-react';
+import { Menu, Search, Menu as MenuIcon, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -98,19 +98,9 @@ export function Header({ title, breadcrumbs = [], onMenuClick }) {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                                {user?.profile_photo_url ? (
-                                    <img
-                                        className="h-8 w-8 rounded-full"
-                                        src={user.profile_photo_url}
-                                        alt={user.name}
-                                    />
-                                ) : (
-                                    <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                                        <span className="text-sm font-semibold text-white">
-                                            {user?.name?.charAt(0) ?? '?'}
-                                        </span>
-                                    </div>
-                                )}
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full text-black">
+                                    <UserRound className="h-4 w-4" aria-hidden="true" />
+                                </div>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="end" forceMount>

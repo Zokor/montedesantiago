@@ -716,7 +716,8 @@ const MediaGrid = ({ items, selected, onSelect, onPreview }: MediaGridProps) => 
         {items.map((item) => {
             const isSelected = selected.has(item.id);
             const extensionLabel = mediaLabel(item);
-            const preview = item.thumbnail_url ?? item.url ?? '';
+            const isImage = item.type?.toLowerCase().startsWith('image/');
+            const preview = item.thumbnail_url ?? (isImage ? item.url ?? '' : '');
 
             return (
                 <Card
@@ -838,7 +839,8 @@ const MediaPreviewDialog = ({ item, open, onClose, onRename, onReplace, onDelete
         return null;
     }
 
-    const preview = item.url ?? item.thumbnail_url ?? '';
+    const isImage = item.type?.toLowerCase().startsWith('image/');
+    const preview = item.thumbnail_url ?? (isImage ? item.url ?? '' : '');
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => (!isOpen ? onClose() : null)}>
