@@ -9,6 +9,8 @@ import {
     SearchIcon,
     Trash2Icon,
     UploadIcon,
+    Check,
+    Copy,
 } from 'lucide-react';
 
 import { useMediaLibrary, MediaFilters, MediaItem, MediaPayload, MediaViewMode } from '@/hooks/use-media-library';
@@ -21,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import { useClipboard } from '@/hooks/use-clipboard';
 
 interface MediaBrowserProps {
     initialPayload: MediaPayload;
@@ -631,6 +634,38 @@ const UploadDropzone = ({ onUpload, isUploading, queue }: UploadDropzoneProps) =
     );
 };
 
+const CopyUrlButton = ({ url }: { url?: string | null }) => {
+    const [copiedValue, copy] = useClipboard();
+
+    if (!url) {
+        return null;
+    }
+
+    const isCopied = copiedValue === url;
+    const Icon = isCopied ? Check : Copy;
+
+    const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation();
+        event.preventDefault();
+        await copy(url);
+    };
+
+    return (
+        <button
+            type="button"
+            onClick={handleClick}
+            className={cn(
+                'inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background/95 text-foreground shadow-sm transition',
+                isCopied ? 'border-primary text-primary' : 'hover:bg-background'
+            )}
+            aria-label={isCopied ? 'URL copied' : 'Copy URL'}
+            title={isCopied ? 'Copied to clipboard' : 'Copy file URL'}
+        >
+            <Icon className="h-4 w-4" />
+        </button>
+    );
+};
+
 const MediaGrid = ({ items, selected, onSelect, onPreview }: MediaGridProps) => (
     <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((item) => {
@@ -659,6 +694,11 @@ const MediaGrid = ({ items, selected, onSelect, onPreview }: MediaGridProps) => 
                             />
                             <Badge variant="secondary">{humanReadableType(item.type)}</Badge>
                         </div>
+                        <div className="pointer-events-none absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100">
+                            <div className="pointer-events-auto">
+                                <CopyUrlButton url={item.url} />
+                            </div>
+                        </div>
                     </div>
                     <CardHeader className="gap-1 py-3">
                         <CardTitle className="line-clamp-1 text-sm font-semibold">{item.original_name}</CardTitle>
@@ -685,6 +725,7 @@ const MediaList = ({ items, selected, onSelect, onPreview }: MediaListProps) => 
                     <th className="px-4 py-3 text-left">Size</th>
                     <th className="px-4 py-3 text-left">Folder</th>
                     <th className="px-4 py-3 text-left">Updated</th>
+                    <th className="w-20 px-4 py-3 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -705,6 +746,9 @@ const MediaList = ({ items, selected, onSelect, onPreview }: MediaListProps) => 
                             <td className="px-4 py-3">{item.formatted_size ?? `${(item.size / 1024).toFixed(1)} KB`}</td>
                             <td className="px-4 py-3">{item.folder ?? '/'}</td>
                             <td className="px-4 py-3 text-muted-foreground">{relativeTimeFromNow(item.updated_at)}</td>
+                            <td className="px-4 py-3 text-right">
+                                <CopyUrlButton url={item.url} />
+                            </td>
                         </tr>
                     );
                 })}
