@@ -21,21 +21,26 @@ class MediaFactory extends Factory
         $filename = Str::uuid()->toString().'.jpg';
         $width = $this->faker->numberBetween(640, 1920);
         $height = $this->faker->numberBetween(480, 1080);
+        $folder = '/images';
 
         return [
             'filename' => $filename,
-            'original_filename' => $this->faker->lexify('image-????.jpg'),
-            'mime_type' => 'image/jpeg',
-            'disk' => 'public',
+            'original_name' => $this->faker->lexify('image-????.jpg'),
+            'type' => 'image/jpeg',
+            'disk' => 'media_local',
             'path' => 'uploads/'.$filename,
-            'thumbnail_path' => null,
+            'url' => config('app.url').'/uploads/'.$filename,
+            'thumbnail_path' => 'uploads/thumbnails/'.$filename,
             'size' => $this->faker->numberBetween(50_000, 4_000_000),
             'metadata' => [
                 'width' => $width,
                 'height' => $height,
                 'alt' => $this->faker->sentence(),
             ],
-            'folder' => '/images',
+            'folder' => $folder,
+            'tags' => [$this->faker->word()],
+            'width' => $width,
+            'height' => $height,
             'uploaded_by' => User::factory(),
         ];
     }

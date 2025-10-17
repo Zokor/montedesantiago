@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 
 import { AdminLayout } from '@/components/Layout/AdminLayout';
+import MediaPicker from '@/components/media/media-picker';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
+import { MediaItem } from '@/hooks/use-media-library';
 
 import { cn } from '@/lib/utils';
 
@@ -52,6 +55,14 @@ interface PersistedComponent {
     slug: string;
     description?: string | null;
 }
+
+type MediaReference = {
+    id: number;
+    original_name: string;
+    url?: string | null;
+    thumbnail_url?: string | null;
+    type: string;
+};
 
 const palette: PaletteItem[] = [
     {
@@ -243,6 +254,44 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
     }
 
     const update = (changes: Partial<CanvasField>) => onChange(field.id, changes);
+    const [isMediaPickerOpen, setMediaPickerOpen] = useState(false);
+
+    const defaultMedia = useMemo<MediaReference[]>(() => {
+        const value = field.config?.default_media;
+        if (!Array.isArray(value)) {
+            return [];
+        }
+
+        return value as MediaReference[];
+    }, [field.config?.default_media]);
+
+    const allowMultipleMedia = Boolean(field.config?.allow_multiple);
+
+    const handleMediaSelect = (items: MediaItem[]) => {
+        const references: MediaReference[] = items.map((item) => ({
+            id: item.id,
+            original_name: item.original_name,
+            url: item.url ?? null,
+            thumbnail_url: item.thumbnail_url ?? null,
+            type: item.type,
+        }));
+
+        const nextConfig = {
+            ...(field.config ?? {}),
+            default_media: references,
+        };
+
+        update({ config: nextConfig });
+    };
+
+    const removeDefaultMedia = (id: number) => {
+        const nextConfig = {
+            ...(field.config ?? {}),
+            default_media: defaultMedia.filter((item) => item.id !== id),
+        };
+
+        update({ config: nextConfig });
+    };
 
     return (
         <Card>
@@ -326,6 +375,76 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                             onChange={(event) =>
                                 update({ config: { ...field.config, collection: slugify(event.target.value) } })
                             }
+                        />
+                    </div>
+                )}
+
+                {['image', 'file'].includes(field.type) && (
+                    <div className="space-y-3 rounded-lg border border-dashed border-muted-foreground/40 p-4">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                                <Label>Media options</Label>
+                                <p className="text-xs text-muted-foreground">
+                                    Configure how this field interacts with the media library.
+                                </p>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={() => setMediaPickerOpen(true)}>
+                                Browse media
+                            </Button>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id={`field-${field.id}-allow-multiple`}
+                                checked={allowMultipleMedia}
+                                onCheckedChange={(checked) => {
+                                    const nextConfig = {
+                                        ...(field.config ?? {}),
+                                        allow_multiple: Boolean(checked),
+                                    };
+
+                                    update({ config: nextConfig });
+                                }}
+                            />
+                            <Label htmlFor={`field-${field.id}-allow-multiple`} className="text-sm font-normal">
+                                Allow selecting multiple files
+                            </Label>
+                        </div>
+
+                        <div className="space-y-2 text-xs">
+                            <p className="font-medium text-muted-foreground">Default selection</p>
+                            {defaultMedia.length === 0 ? (
+                                <p className="text-muted-foreground">No default media selected.</p>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    {defaultMedia.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="flex items-center justify-between rounded border bg-muted/40 px-3 py-2"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="secondary">{item.type.split('/')[0]}</Badge>
+                                                <span className="font-medium text-foreground">{item.original_name}</span>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => removeDefaultMedia(item.id)}
+                                            >
+                                                <Trash2 className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <MediaPicker
+                            open={isMediaPickerOpen}
+                            onClose={() => setMediaPickerOpen(false)}
+                            onSelect={handleMediaSelect}
+                            allowMultiple={allowMultipleMedia}
+                            contextTag={field.slug ? `component:${field.slug}` : undefined}
                         />
                     </div>
                 )}

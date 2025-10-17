@@ -16,19 +16,25 @@ class Media extends Model
 
     use SoftDeletes;
 
+    protected $table = 'cms_media';
+
     /**
      * @var array<int, string>
      */
     protected $fillable = [
         'filename',
-        'original_filename',
-        'mime_type',
+        'original_name',
+        'type',
         'disk',
         'path',
+        'url',
         'thumbnail_path',
         'size',
         'metadata',
         'folder',
+        'tags',
+        'width',
+        'height',
         'uploaded_by',
     ];
 
@@ -37,6 +43,9 @@ class Media extends Model
         return [
             'metadata' => 'array',
             'size' => 'integer',
+            'tags' => 'array',
+            'width' => 'integer',
+            'height' => 'integer',
             'deleted_at' => 'datetime',
         ];
     }
@@ -55,9 +64,7 @@ class Media extends Model
     protected function url(): Attribute
     {
         return Attribute::make(
-            get: fn (): ?string => $this->path
-                ? Storage::disk($this->disk)->url($this->path)
-                : null,
+            get: fn (?string $value): ?string => $value ?? $this->resolveUrl(),
         );
     }
 
@@ -97,5 +104,18 @@ class Media extends Model
         $bytes /= 1024 ** $pow;
 
         return round($bytes, $precision).' '.$units[$pow];
+    }
+
+    private function resolveUrl(): ?string
+    {
+        if (! $this->path || ! $this->disk) {
+            return null;
+        }
+
+        return rescue(
+            fn () => Storage::disk($this->disk)->url($this->path),
+            null,
+            report: true
+        );
     }
 }

@@ -16,18 +16,20 @@ class MediaController extends Controller
 
         $search = $request->string('search')->trim();
         $folder = $request->get('folder');
-        $mime = $request->get('mime');
+        $type = $request->get('type');
+        $tag = $request->get('tag');
 
         $media = Media::query()
             ->when($search->isNotEmpty(), function ($query) use ($search) {
                 $query->where(function ($builder) use ($search) {
                     $builder
-                        ->where('original_filename', 'like', "%{$search}%")
+                        ->where('original_name', 'like', "%{$search}%")
                         ->orWhere('filename', 'like', "%{$search}%");
                 });
             })
             ->when($folder, fn ($query) => $query->where('folder', $folder))
-            ->when($mime, fn ($query) => $query->where('mime_type', 'like', "{$mime}%"))
+            ->when($type, fn ($query) => $query->where('type', 'like', "{$type}%"))
+            ->when($tag, fn ($query) => $query->whereJsonContains('tags', $tag))
             ->orderByDesc('created_at')
             ->paginate($perPage)
             ->withQueryString();
