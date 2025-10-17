@@ -1,12 +1,93 @@
-import { SVGAttributes } from 'react';
+import type { SVGAttributes } from 'react';
 
 export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
+    const { style, ...rest } = props;
+    const mergedStyle = {
+        cursor: 'pointer',
+        ...(style as React.CSSProperties),
+    };
+
     return (
-        <svg {...props} viewBox="0 0 40 42" xmlns="http://www.w3.org/2000/svg">
+        <svg
+            {...rest}
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 54 53"
+            width="200"
+            height="200"
+            style={mergedStyle}
+        >
+            <style>
+                {`
+                    .cube {
+                        transform-box: fill-box;
+                        transform-origin: center;
+                        transition: transform 0.9s cubic-bezier(0.19, 1, 0.22, 1);
+                    }
+
+                    svg:hover .secondColumnTop { transform: translateY(11px) translateX(-11px) rotate(320deg); }
+                    svg:hover .thirdColumnMiddle { transform: translateY(7px) translateX(-7px) rotate(310deg); }
+                    svg:hover .thirdColumnTop { transform: translateY(16px) translateX(-17px) rotate(270deg); }
+
+
+
+                `}
+            </style>
+
             <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M17.2 5.63325L8.6 0.855469L0 5.63325V32.1434L16.2 41.1434L32.4 32.1434V23.699L40 19.4767V9.85547L31.4 5.07769L22.8 9.85547V18.2999L17.2 21.411V5.63325ZM38 18.2999L32.4 21.411V15.2545L38 12.1434V18.2999ZM36.9409 10.4439L31.4 13.5221L25.8591 10.4439L31.4 7.36561L36.9409 10.4439ZM24.8 18.2999V12.1434L30.4 15.2545V21.411L24.8 18.2999ZM23.8 20.0323L29.3409 23.1105L16.2 30.411L10.6591 27.3328L23.8 20.0323ZM7.6 27.9212L15.2 32.1434V38.2999L2 30.9666V7.92116L7.6 11.0323V27.9212ZM8.6 9.29991L3.05913 6.22165L8.6 3.14339L14.1409 6.22165L8.6 9.29991ZM30.4 24.8101L17.2 32.1434V38.2999L30.4 30.9666V24.8101ZM9.6 11.0323L15.2 7.92117V22.5221L9.6 25.6333V11.0323Z"
+                className="cube top firstColumnTop"
+                d="M0 16H11V27H0V16Z"
+                fill="black"
+            />
+            <path
+                className="cube middle firstColumnMiddle"
+                d="M0 29H11V40H0V29Z"
+                fill="black"
+            />
+            <path
+                className="cube bottom firstColumnBottom"
+                d="M0 42H11V53H0V42Z"
+                fill="black"
+            />
+
+            {/* Column 1 */}
+
+            {/* Column 2 */}
+
+            <path
+                className="cube middle secondColumnTop"
+                d="M29.0708 3L37.4973 10.0707L30.4266 18.4972L22.0001 11.4265L29.0708 3Z"
+                fill="black"
+            />
+
+            <path
+                className="cube top secondColumnMiddle"
+                d="M13 29H24V40H13V29Z"
+                fill="black"
+            />
+            <path
+                className="cube middle secondColumnBottom"
+                d="M13 42H24V53H13V42Z"
+                fill="black"
+            />
+
+            {/* Column 3 */}
+
+            <path
+                className="cube top thirdColumnTop"
+                d="M43 0H54V11H43V0Z"
+                fill="black"
+            />
+
+            <path
+                className="cube bottom thirdColumnMiddle"
+                d="M39.4263 20L46.4969 28.4265L38.0704 35.4972L30.9998 27.0707L39.4263 20Z"
+                fill="black"
+            />
+
+            <path
+                className="cube bottom thirdColumnBottom"
+                d="M26 42H37V53H26V42Z"
+                fill="black"
             />
         </svg>
     );
