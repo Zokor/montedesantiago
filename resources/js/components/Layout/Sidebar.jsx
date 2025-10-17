@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import AppLogoIcon from '@/components/app-logo-icon';
 
 const navigation = [
     { name: 'Dashboard', href: '/bo/dashboard', icon: LayoutDashboard },
@@ -23,6 +24,7 @@ const navigation = [
 
 export function Sidebar({ isOpen, onClose }) {
     const { url } = usePage();
+    const [isBrandHovered, setIsBrandHovered] = React.useState(false);
 
     return (
         <>
@@ -30,12 +32,14 @@ export function Sidebar({ isOpen, onClose }) {
             <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
                 <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-gray-800 px-6 pb-4 shadow-sm border-r border-gray-200 dark:border-gray-700">
                     <div className="flex h-16 shrink-0 items-center">
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">CMS</span>
-                            </div>
+                        <div
+                            className="flex items-center gap-2"
+                            onMouseEnter={() => setIsBrandHovered(true)}
+                            onMouseLeave={() => setIsBrandHovered(false)}
+                        >
+                            <AppLogoIcon className="h-8 w-8" aria-hidden="true" animate={isBrandHovered} />
                             <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Admin Panel
+                                Obviousgadget
                             </span>
                         </div>
                     </div>
@@ -86,12 +90,14 @@ export function Sidebar({ isOpen, onClose }) {
             )}>
                 <div className="flex h-full flex-col">
                     <div className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">CMS</span>
-                            </div>
+                        <div
+                            className="flex items-center gap-2"
+                            onMouseEnter={() => setIsBrandHovered(true)}
+                            onMouseLeave={() => setIsBrandHovered(false)}
+                        >
+                            <AppLogoIcon className="h-8 w-8" aria-hidden="true" animate={isBrandHovered} />
                             <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Admin Panel
+                                Obviousgadget
                             </span>
                         </div>
                         <Button

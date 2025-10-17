@@ -1,11 +1,16 @@
-import type { SVGAttributes } from 'react';
+import type { CSSProperties, SVGAttributes } from 'react';
 
-export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
-    const { style, ...rest } = props;
+type AppLogoIconProps = SVGAttributes<SVGElement> & {
+    animate?: boolean;
+};
+
+export default function AppLogoIcon(props: AppLogoIconProps) {
+    const { style, className, animate = false, ...rest } = props;
     const mergedStyle = {
         cursor: 'pointer',
-        ...(style as React.CSSProperties),
+        ...(style as CSSProperties),
     };
+    const combinedClassName = ['app-logo-icon', className].filter(Boolean).join(' ');
 
     return (
         <svg
@@ -15,6 +20,8 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
             width="200"
             height="200"
             style={mergedStyle}
+            className={combinedClassName}
+            data-animated={animate || undefined}
         >
             <style>
                 {`
@@ -24,9 +31,20 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                         transition: transform 0.9s cubic-bezier(0.19, 1, 0.22, 1);
                     }
 
-                    svg:hover .secondColumnTop { transform: translateY(11px) translateX(-11px) rotate(320deg); }
-                    svg:hover .thirdColumnMiddle { transform: translateY(7px) translateX(-7px) rotate(310deg); }
-                    svg:hover .thirdColumnTop { transform: translateY(16px) translateX(-17px) rotate(270deg); }
+                    .app-logo-icon:hover .secondColumnTop,
+                    .app-logo-icon[data-animated="true"] .secondColumnTop {
+                        transform: translateY(11px) translateX(-11px) rotate(320deg);
+                    }
+
+                    .app-logo-icon:hover .thirdColumnMiddle,
+                    .app-logo-icon[data-animated="true"] .thirdColumnMiddle {
+                        transform: translateY(7px) translateX(-7px) rotate(310deg);
+                    }
+
+                    .app-logo-icon:hover .thirdColumnTop,
+                    .app-logo-icon[data-animated="true"] .thirdColumnTop {
+                        transform: translateY(16px) translateX(-17px) rotate(270deg);
+                    }
 
 
 
