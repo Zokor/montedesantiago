@@ -44,7 +44,9 @@ Route::prefix('bo')->middleware(['auth', 'verified', EnsureUserIsActive::class])
         ->name('components.duplicate');
     Route::apiResource('collections', CollectionController::class)->except(['create', 'edit']);
     Route::apiResource('pages', PageController::class)->except(['create', 'edit']);
-    Route::apiResource('media', MediaController::class)->except(['create', 'edit']);
+    Route::apiResource('media', MediaController::class)
+        ->parameters(['media' => 'media'])
+        ->except(['create', 'edit']);
     Route::post('media/{media}/replace', [MediaController::class, 'replace'])->name('media.replace');
     Route::get('users', [UserController::class, 'index'])->name('users.index');
     Route::post('users', [UserController::class, 'store'])->name('users.store');

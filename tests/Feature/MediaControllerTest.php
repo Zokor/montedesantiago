@@ -20,8 +20,8 @@ beforeEach(function () {
         'database.connections.sqlite.database' => database_path('database.sqlite'),
         'media.storage' => 'local',
         'media.disks.local' => 'media_local',
-        'media.directories.base' => 'uploads',
-        'media.directories.thumbnails' => 'uploads/thumbnails',
+        'media.directories.base' => 'media',
+        'media.directories.thumbnails' => 'media/thumbnails',
     ]);
 
     if (! file_exists(database_path('database.sqlite'))) {
@@ -58,14 +58,14 @@ it('uploads media files to the configured disk', function () {
 });
 
 it('moves and renames media files via the storage service', function () {
-    Storage::disk('media_local')->put('uploads/hero/feature.jpg', 'content');
+    Storage::disk('media_local')->put('media/hero/feature.jpg', 'content');
 
     $media = Media::factory()->create([
         'filename' => 'feature.jpg',
         'original_name' => 'feature.jpg',
         'type' => 'image/jpeg',
         'disk' => 'media_local',
-        'path' => 'uploads/hero/feature.jpg',
+        'path' => 'media/hero/feature.jpg',
         'folder' => '/hero',
         'tags' => ['component:hero'],
         'uploaded_by' => $this->user->id,
@@ -93,13 +93,13 @@ it('moves and renames media files via the storage service', function () {
 });
 
 it('replaces media file and stores new metadata', function () {
-    Storage::disk('media_local')->put('uploads/team/photo.jpg', 'original-content');
+    Storage::disk('media_local')->put('media/team/photo.jpg', 'original-content');
 
     $media = Media::factory()->create([
         'filename' => 'photo.jpg',
         'original_name' => 'photo.jpg',
         'disk' => 'media_local',
-        'path' => 'uploads/team/photo.jpg',
+        'path' => 'media/team/photo.jpg',
         'folder' => '/team',
         'uploaded_by' => $this->user->id,
     ]);
@@ -160,4 +160,30 @@ it('stores svg uploads without attempting image processing', function () {
     expect($media)->not->toBeNull();
     expect($media->thumbnail_path)->toBeNull();
     Storage::disk('media_local')->assertExists($media->path);
+});
+
+it('deletes media from storage and database', function () {
+    Storage::disk('media_local')->put('media/library/sample.pdf', 'fake-content');
+
+    $media = Media::factory()->create([
+        'filename' => 'sample.pdf',
+        'original_name' => 'sample.pdf',
+        'type' => 'application/pdf',
+        'disk' => 'media_local',
+        'path' => 'media/library/sample.pdf',
+        'folder' => '/library',
+        'uploaded_by' => $this->user->id,
+    ]);
+
+    expect(Media::query()->count())->toBe(1);
+    Storage::disk('media_local')->assertExists('media/library/sample.pdf');
+
+    $response = $this
+        ->actingAs($this->user)
+        ->deleteJson("/bo/media/{$media->id}");
+
+    $response->assertOk();
+    expect($response->json('message'))->toBe('Media deleted successfully.');
+    expect(Media::withTrashed()->find($media->id))->toBeNull();
+    Storage::disk('media_local')->assertMissing('media/library/sample.pdf');
 });

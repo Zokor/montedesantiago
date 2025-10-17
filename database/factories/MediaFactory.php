@@ -22,15 +22,16 @@ class MediaFactory extends Factory
         $width = $this->faker->numberBetween(640, 1920);
         $height = $this->faker->numberBetween(480, 1080);
         $folder = '/images';
+        $basePath = 'media';
 
         return [
             'filename' => $filename,
             'original_name' => $this->faker->lexify('image-????.jpg'),
             'type' => 'image/jpeg',
             'disk' => 'media_local',
-            'path' => 'uploads/'.$filename,
-            'url' => config('app.url').'/uploads/'.$filename,
-            'thumbnail_path' => 'uploads/thumbnails/'.$filename,
+            'path' => $basePath.'/'.$filename,
+            'url' => config('app.url').'/'.$basePath.'/'.$filename,
+            'thumbnail_path' => $basePath.'/thumbnails/'.$filename,
             'size' => $this->faker->numberBetween(50_000, 4_000_000),
             'metadata' => [
                 'width' => $width,

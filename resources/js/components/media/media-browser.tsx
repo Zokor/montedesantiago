@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-    FileIcon,
     FilesIcon,
-    ImageIcon,
     LayoutGridIcon,
     ListIcon,
     Loader2Icon,
@@ -90,7 +88,54 @@ const extractExtension = (filename: string) => {
     return parts.pop() ?? '';
 };
 
-const fallbackThumbnail = (type: string) => (type.startsWith('image/') ? <ImageIcon className="h-10 w-10 text-muted-foreground" /> : <FileIcon className="h-10 w-10 text-muted-foreground" />);
+const acronymFromName = (value: string): string => {
+    const withoutExtension = value.replace(/\.[^/.]+$/, '');
+    const parts = withoutExtension.split(/[\s._-]+/).filter(Boolean);
+
+    if (parts.length === 0) {
+        return withoutExtension.slice(0, 3).toUpperCase() || '?';
+    }
+
+    const acronym = parts.map((part) => part[0] ?? '').join('');
+
+    if (acronym.length >= 2) {
+        return acronym.slice(0, 3).toUpperCase();
+    }
+
+    return (parts[0]?.slice(0, 3) ?? '?').toUpperCase();
+};
+
+const mediaAcronym = (item: MediaItem): string => {
+    const source = item.original_name || item.filename || '';
+    return acronymFromName(source);
+};
+
+const mediaLabel = (item: MediaItem): string => {
+    const extension = extractExtension(item.filename).toUpperCase();
+    if (extension) {
+        return extension;
+    }
+
+    return humanReadableType(item.type).toUpperCase();
+};
+
+const renderFallbackCardPreview = (item: MediaItem) => (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-muted">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background/90 text-xl font-semibold text-muted-foreground shadow-sm">
+            {mediaAcronym(item)}
+        </div>
+        <span className="text-xs font-medium uppercase text-muted-foreground/70">{mediaLabel(item)}</span>
+    </div>
+);
+
+const renderFallbackModalPreview = (item: MediaItem) => (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-muted">
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-background/90 text-3xl font-semibold text-muted-foreground shadow-md">
+            {mediaAcronym(item)}
+        </div>
+        <div className="text-sm font-medium uppercase text-muted-foreground/70">{mediaLabel(item)}</div>
+    </div>
+);
 
 const relativeTimeFromNow = (value?: string | null) => {
     if (!value) {
@@ -655,7 +700,7 @@ const CopyUrlButton = ({ url }: { url?: string | null }) => {
             type="button"
             onClick={handleClick}
             className={cn(
-                'inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background/95 text-foreground shadow-sm transition',
+                'inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background/95 text-foreground shadow-sm transition cursor-pointer',
                 isCopied ? 'border-primary text-primary' : 'hover:bg-background'
             )}
             aria-label={isCopied ? 'URL copied' : 'Copy URL'}
@@ -670,13 +715,16 @@ const MediaGrid = ({ items, selected, onSelect, onPreview }: MediaGridProps) => 
     <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((item) => {
             const isSelected = selected.has(item.id);
-            const extension = extractExtension(item.filename);
+            const extensionLabel = mediaLabel(item);
             const preview = item.thumbnail_url ?? item.url ?? '';
 
             return (
                 <Card
                     key={item.id}
-                    className={cn('group relative cursor-pointer transition-shadow hover:shadow-lg', isSelected && 'border-primary')}
+                    className={cn(
+                        'group relative cursor-pointer transition-shadow hover:shadow-lg',
+                        isSelected && 'border-primary bg-primary/10 ring-1 ring-primary/30'
+                    )}
                     onClick={() => onSelect(item)}
                     onDoubleClick={() => onPreview(item)}
                 >
@@ -684,17 +732,26 @@ const MediaGrid = ({ items, selected, onSelect, onPreview }: MediaGridProps) => 
                         {preview ? (
                             <img src={preview} alt={item.original_name} className="h-full w-full object-cover" loading="lazy" />
                         ) : (
-                            fallbackThumbnail(item.type)
+                            renderFallbackCardPreview(item)
                         )}
-                        <div className="absolute left-3 top-3 flex items-center gap-2">
-                            <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() => onSelect(item)}
-                                className="pointer-events-none border-background text-background"
-                            />
-                            <Badge variant="secondary">{humanReadableType(item.type)}</Badge>
+                        <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-background/80 px-2 py-1 shadow-sm backdrop-blur">
+                            <div className="flex items-center">
+                                <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={() => onSelect(item)}
+                                    className="pointer-events-none border-background text-background"
+                                />
+                            </div>
+                            <Badge variant="secondary" className="bg-transparent text-foreground">
+                                {humanReadableType(item.type)}
+                            </Badge>
                         </div>
-                        <div className="pointer-events-none absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100">
+                        <div
+                            className={cn(
+                                'pointer-events-none absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100',
+                                isSelected && 'opacity-100'
+                            )}
+                        >
                             <div className="pointer-events-auto">
                                 <CopyUrlButton url={item.url} />
                             </div>
@@ -705,7 +762,7 @@ const MediaGrid = ({ items, selected, onSelect, onPreview }: MediaGridProps) => 
                         <CardDescription className="text-xs">{item.formatted_size ?? `${(item.size / 1024).toFixed(1)} KB`}</CardDescription>
                     </CardHeader>
                         <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{extension.toUpperCase()}</span>
+                            <span>{extensionLabel}</span>
                             <span>{relativeTimeFromNow(item.created_at)}</span>
                         </CardFooter>
                     </Card>
@@ -734,7 +791,10 @@ const MediaList = ({ items, selected, onSelect, onPreview }: MediaListProps) => 
                     return (
                         <tr
                             key={item.id}
-                            className={cn('border-b transition-colors hover:bg-muted/50', isSelected && 'bg-primary/5')}
+                            className={cn(
+                                'border-b transition-colors hover:bg-muted/50',
+                                isSelected && 'bg-primary/10'
+                            )}
                             onClick={() => onSelect(item)}
                             onDoubleClick={() => onPreview(item)}
                         >
@@ -792,7 +852,7 @@ const MediaPreviewDialog = ({ item, open, onClose, onRename, onReplace, onDelete
                             {preview ? (
                                 <img src={preview} alt={item.original_name} className="h-full w-full object-contain" />
                             ) : (
-                                fallbackThumbnail(item.type)
+                                renderFallbackModalPreview(item)
                             )}
                         </div>
                         <div className="grid gap-2 text-sm">

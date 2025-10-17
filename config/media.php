@@ -39,8 +39,8 @@ return [
     */
 
     'directories' => [
-        'base' => env('MEDIA_DEFAULT_FOLDER', 'uploads'),
-        'thumbnails' => env('MEDIA_THUMBNAIL_FOLDER', 'uploads/thumbnails'),
+        'base' => env('MEDIA_DEFAULT_FOLDER', 'media'),
+        'thumbnails' => env('MEDIA_THUMBNAIL_FOLDER', 'media/thumbnails'),
     ],
 
     /*

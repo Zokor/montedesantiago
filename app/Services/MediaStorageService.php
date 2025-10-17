@@ -221,7 +221,14 @@ class MediaStorageService
     public function delete(Media $media): void
     {
         $this->deleteFiles($media);
-        $media->delete();
+
+        $deleted = method_exists($media, 'forceDelete')
+            ? $media->forceDelete()
+            : $media->delete();
+
+        if ($deleted === false) {
+            throw new \RuntimeException('Failed to delete media record.');
+        }
     }
 
     private function deleteFiles(Media $media): void
