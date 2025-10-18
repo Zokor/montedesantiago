@@ -1,16 +1,38 @@
-import { type MouseEvent, useEffect, useMemo, useState } from 'react';
-import { DndContext, DragEndEvent, PointerSensor, closestCorners, useDroppable, useDraggable, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import {
+    DndContext,
+    DragEndEvent,
+    DragMoveEvent,
+    DragStartEvent,
+    PointerSensor,
+    closestCorners,
+    useDraggable,
+    useDroppable,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    arrayMove,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
+import { Fragment, type MouseEvent, useEffect, useMemo, useState } from 'react';
 
-import { AdminLayout } from '@/components/layout/admin-layout';
 import ConfirmDialog from '@/components/feedback/confirm-dialog';
+import { AdminLayout } from '@/components/layout/admin-layout';
 import MediaPicker from '@/components/media/media-picker';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -141,7 +163,10 @@ const palette: PaletteItem[] = [
     },
 ];
 
-const generateId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `field-${Date.now()}-${Math.random()}`);
+const generateId = () =>
+    typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `field-${Date.now()}-${Math.random()}`;
 
 const slugify = (value: string) =>
     value
@@ -151,13 +176,25 @@ const slugify = (value: string) =>
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-');
 
-const CanvasSortableItem = ({ field, isSelected, onSelect, onRemove }: {
+const CanvasSortableItem = ({
+    field,
+    isSelected,
+    onSelect,
+    onRemove,
+}: {
     field: CanvasField;
     isSelected: boolean;
     onSelect: (id: string) => void;
     onRemove: (id: string) => void;
 }) => {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({
         id: field.id,
         data: { from: 'canvas' },
     });
@@ -171,12 +208,22 @@ const CanvasSortableItem = ({ field, isSelected, onSelect, onRemove }: {
         <Card
             ref={setNodeRef}
             style={style}
-            className={cn('border-dashed hover:border-foreground/40 cursor-grab', isSelected && 'border-primary shadow-sm', isDragging && 'opacity-70')}
+            className={cn(
+                'cursor-grab border-dashed hover:border-foreground/40',
+                isSelected && 'border-primary shadow-sm',
+                isDragging && 'opacity-70',
+            )}
             onClick={() => onSelect(field.id)}
         >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" {...listeners} {...attributes} className="h-8 w-8 cursor-grab">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        {...listeners}
+                        {...attributes}
+                        className="h-8 w-8 cursor-grab"
+                    >
                         <GripVertical className="h-4 w-4" />
                     </Button>
                     <CardTitle className="text-base font-semibold">
@@ -205,8 +252,12 @@ const CanvasSortableItem = ({ field, isSelected, onSelect, onRemove }: {
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                    <Badge variant="outline">{field.type.replace('_', ' ')}</Badge>
-                    {field.is_required && <Badge variant="secondary">Required</Badge>}
+                    <Badge variant="outline">
+                        {field.type.replace('_', ' ')}
+                    </Badge>
+                    {field.is_required && (
+                        <Badge variant="secondary">Required</Badge>
+                    )}
                 </div>
                 {field.help_text && <p>{field.help_text}</p>}
             </CardContent>
@@ -214,7 +265,19 @@ const CanvasSortableItem = ({ field, isSelected, onSelect, onRemove }: {
     );
 };
 
-const PaletteDraggableItem = ({ item, onAdd }: { item: PaletteItem; onAdd: (type: FieldType) => void }) => {
+const PalettePlaceholder = ({ label }: { label: string }) => (
+    <div className="rounded-lg border border-dashed border-primary/60 bg-primary/10 px-4 py-3 text-sm font-medium text-primary">
+        Drop to add {label}
+    </div>
+);
+
+const PaletteDraggableItem = ({
+    item,
+    onAdd,
+}: {
+    item: PaletteItem;
+    onAdd: (type: FieldType) => void;
+}) => {
     const id = `palette-${item.type}`;
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id,
@@ -230,7 +293,10 @@ const PaletteDraggableItem = ({ item, onAdd }: { item: PaletteItem; onAdd: (type
     return (
         <Card
             ref={setNodeRef}
-            className={cn('cursor-pointer border-dashed hover:border-foreground/50', isDragging && 'opacity-60')}
+            className={cn(
+                'cursor-pointer border-dashed hover:border-foreground/50',
+                isDragging && 'opacity-60',
+            )}
             {...listeners}
             {...attributes}
         >
@@ -256,11 +322,17 @@ const PaletteDraggableItem = ({ item, onAdd }: { item: PaletteItem; onAdd: (type
     );
 };
 
-const CanvasDropZone = ({ isOver, children }: { isOver: boolean; children: React.ReactNode }) => (
+const CanvasDropZone = ({
+    isOver,
+    children,
+}: {
+    isOver: boolean;
+    children: React.ReactNode;
+}) => (
     <div
         className={cn(
             'min-h-[320px] rounded-lg border border-dashed border-muted-foreground/40 p-4 transition-colors',
-            isOver ? 'border-primary bg-primary/5' : 'bg-muted/10'
+            isOver ? 'border-primary bg-primary/5' : 'bg-muted/10',
         )}
     >
         {children}
@@ -278,13 +350,16 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
             <Card>
                 <CardHeader>
                     <CardTitle>Field inspector</CardTitle>
-                    <CardDescription>Select a field to edit its settings.</CardDescription>
+                    <CardDescription>
+                        Select a field to edit its settings.
+                    </CardDescription>
                 </CardHeader>
             </Card>
         );
     }
 
-    const update = (changes: Partial<CanvasField>) => onChange(field.id, changes);
+    const update = (changes: Partial<CanvasField>) =>
+        onChange(field.id, changes);
     const [isMediaPickerOpen, setMediaPickerOpen] = useState(false);
 
     const defaultMedia = useMemo<MediaReference[]>(() => {
@@ -328,7 +403,9 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
         <Card>
             <CardHeader>
                 <CardTitle>Field settings</CardTitle>
-                <CardDescription>Configure label, slug, validation, and helper text.</CardDescription>
+                <CardDescription>
+                    Configure label, slug, validation, and helper text.
+                </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -338,7 +415,9 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                         value={field.name}
                         onChange={(event) => {
                             const nextName = event.target.value;
-                            const slugChanges = field.hasCustomSlug ? {} : { slug: slugify(nextName) };
+                            const slugChanges = field.hasCustomSlug
+                                ? {}
+                                : { slug: slugify(nextName) };
 
                             update({
                                 name: nextName,
@@ -368,7 +447,9 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                     <Checkbox
                         id="field-required"
                         checked={field.is_required}
-                        onCheckedChange={(checked) => update({ is_required: Boolean(checked) })}
+                        onCheckedChange={(checked) =>
+                            update({ is_required: Boolean(checked) })
+                        }
                     />
                     <Label htmlFor="field-required">Required field</Label>
                 </div>
@@ -377,7 +458,9 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                     <textarea
                         id="field-help"
                         value={field.help_text}
-                        onChange={(event) => update({ help_text: event.target.value })}
+                        onChange={(event) =>
+                            update({ help_text: event.target.value })
+                        }
                         className="min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     />
                 </div>
@@ -388,17 +471,32 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                         <Input
                             id="field-placeholder"
                             value={(field.config?.placeholder as string) ?? ''}
-                            onChange={(event) => update({ config: { ...field.config, placeholder: event.target.value } })}
+                            onChange={(event) =>
+                                update({
+                                    config: {
+                                        ...field.config,
+                                        placeholder: event.target.value,
+                                    },
+                                })
+                            }
                         />
                     </div>
                 )}
 
                 {field.type === 'select' && (
                     <div className="space-y-2">
-                        <Label htmlFor="field-options">Options (comma separated)</Label>
+                        <Label htmlFor="field-options">
+                            Options (comma separated)
+                        </Label>
                         <Input
                             id="field-options"
-                            value={Array.isArray(field.config?.options) ? (field.config?.options as string[]).join(', ') : ''}
+                            value={
+                                Array.isArray(field.config?.options)
+                                    ? (field.config?.options as string[]).join(
+                                          ', ',
+                                      )
+                                    : ''
+                            }
                             onChange={(event) =>
                                 update({
                                     config: {
@@ -416,12 +514,19 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
 
                 {field.type === 'collection' && (
                     <div className="space-y-2">
-                        <Label htmlFor="field-collection">Collection slug</Label>
+                        <Label htmlFor="field-collection">
+                            Collection slug
+                        </Label>
                         <Input
                             id="field-collection"
                             value={(field.config?.collection as string) ?? ''}
                             onChange={(event) =>
-                                update({ config: { ...field.config, collection: slugify(event.target.value) } })
+                                update({
+                                    config: {
+                                        ...field.config,
+                                        collection: slugify(event.target.value),
+                                    },
+                                })
                             }
                         />
                     </div>
@@ -433,10 +538,15 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                             <div className="space-y-1">
                                 <Label>Media options</Label>
                                 <p className="text-xs text-muted-foreground">
-                                    Configure how this field interacts with the media library.
+                                    Configure how this field interacts with the
+                                    media library.
                                 </p>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => setMediaPickerOpen(true)}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setMediaPickerOpen(true)}
+                            >
                                 Browse media
                             </Button>
                         </div>
@@ -454,15 +564,22 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                                     update({ config: nextConfig });
                                 }}
                             />
-                            <Label htmlFor={`field-${field.id}-allow-multiple`} className="text-sm font-normal">
+                            <Label
+                                htmlFor={`field-${field.id}-allow-multiple`}
+                                className="text-sm font-normal"
+                            >
                                 Allow selecting multiple files
                             </Label>
                         </div>
 
                         <div className="space-y-2 text-xs">
-                            <p className="font-medium text-muted-foreground">Default selection</p>
+                            <p className="font-medium text-muted-foreground">
+                                Default selection
+                            </p>
                             {defaultMedia.length === 0 ? (
-                                <p className="text-muted-foreground">No default media selected.</p>
+                                <p className="text-muted-foreground">
+                                    No default media selected.
+                                </p>
                             ) : (
                                 <div className="flex flex-col gap-2">
                                     {defaultMedia.map((item) => (
@@ -471,13 +588,19 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                                             className="flex items-center justify-between rounded border bg-muted/40 px-3 py-2"
                                         >
                                             <div className="flex items-center gap-2">
-                                                <Badge variant="secondary">{item.type.split('/')[0]}</Badge>
-                                                <span className="font-medium text-foreground">{item.original_name}</span>
+                                                <Badge variant="secondary">
+                                                    {item.type.split('/')[0]}
+                                                </Badge>
+                                                <span className="font-medium text-foreground">
+                                                    {item.original_name}
+                                                </span>
                                             </div>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                onClick={() => removeDefaultMedia(item.id)}
+                                                onClick={() =>
+                                                    removeDefaultMedia(item.id)
+                                                }
                                             >
                                                 <Trash2 className="h-3 w-3" />
                                             </Button>
@@ -492,7 +615,11 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                             onClose={() => setMediaPickerOpen(false)}
                             onSelect={handleMediaSelect}
                             allowMultiple={allowMultipleMedia}
-                            contextTag={field.slug ? `component:${field.slug}` : undefined}
+                            contextTag={
+                                field.slug
+                                    ? `component:${field.slug}`
+                                    : undefined
+                            }
                         />
                     </div>
                 )}
@@ -512,8 +639,15 @@ const ComponentWorkspace = () => {
     const [saving, setSaving] = useState(false);
     const [components, setComponents] = useState<PersistedComponent[]>([]);
     const [isLoadingComponents, setIsLoadingComponents] = useState(false);
+    const [activePaletteType, setActivePaletteType] =
+        useState<FieldType | null>(null);
+    const [pendingInsertIndex, setPendingInsertIndex] = useState<number | null>(
+        null,
+    );
 
-    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    );
 
     const { setNodeRef: setCanvasRef, isOver } = useDroppable({ id: 'canvas' });
 
@@ -547,8 +681,30 @@ const ComponentWorkspace = () => {
 
     const selectedField = useMemo(
         () => fields.find((field) => field.id === selectedFieldId),
-        [fields, selectedFieldId]
+        [fields, selectedFieldId],
     );
+
+    const activePaletteItem = useMemo(
+        () =>
+            activePaletteType
+                ? (palette.find((item) => item.type === activePaletteType) ??
+                  null)
+                : null,
+        [activePaletteType],
+    );
+
+    const computeInsertIndex = (over: DragEndEvent['over']): number => {
+        if (!over) {
+            return fields.length;
+        }
+
+        if (over.id === 'canvas') {
+            return fields.length;
+        }
+
+        const overIndex = fields.findIndex((field) => field.id === over.id);
+        return overIndex === -1 ? fields.length : overIndex;
+    };
 
     const addFieldFromPalette = (type: FieldType, insertIndex?: number) => {
         const paletteItem = palette.find((item) => item.type === type);
@@ -580,7 +736,11 @@ const ComponentWorkspace = () => {
             };
 
             const nextFields = [...previous];
-            if (typeof insertIndex === 'number' && insertIndex >= 0 && insertIndex <= nextFields.length) {
+            if (
+                typeof insertIndex === 'number' &&
+                insertIndex >= 0 &&
+                insertIndex <= nextFields.length
+            ) {
                 nextFields.splice(insertIndex, 0, newField);
             } else {
                 nextFields.push(newField);
@@ -592,22 +752,59 @@ const ComponentWorkspace = () => {
         setSelectedFieldId(newFieldId);
     };
 
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        const data = active.data.current as { from?: string; fieldType?: FieldType } | undefined;
+    const handleDragStart = (event: DragStartEvent) => {
+        const data = event.active.data.current as
+            | { from?: string; fieldType?: FieldType }
+            | undefined;
 
         if (data?.from === 'palette' && data.fieldType) {
-            const overIndex = over ? fields.findIndex((field) => field.id === over.id) : -1;
-            const insertIndex = over?.id === 'canvas' ? fields.length : overIndex;
-            const resolvedIndex = insertIndex >= 0 ? insertIndex : fields.length;
-            addFieldFromPalette(data.fieldType, resolvedIndex);
+            setActivePaletteType(data.fieldType);
+            setPendingInsertIndex(fields.length);
+        } else {
+            setActivePaletteType(null);
+            setPendingInsertIndex(null);
+        }
+    };
+
+    const handleDragMove = (event: DragMoveEvent) => {
+        if (!activePaletteType) {
             return;
         }
+
+        setPendingInsertIndex(computeInsertIndex(event.over));
+    };
+
+    const handleDragCancel = () => {
+        setActivePaletteType(null);
+        setPendingInsertIndex(null);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        const data = active.data.current as
+            | { from?: string; fieldType?: FieldType }
+            | undefined;
+
+        if (data?.from === 'palette' && data.fieldType) {
+            const resolvedIndex =
+                pendingInsertIndex ?? computeInsertIndex(over);
+            addFieldFromPalette(data.fieldType, resolvedIndex);
+            setActivePaletteType(null);
+            setPendingInsertIndex(null);
+            return;
+        }
+
+        setActivePaletteType(null);
+        setPendingInsertIndex(null);
 
         const activeIndex = fields.findIndex((field) => field.id === active.id);
         const overIndex = fields.findIndex((field) => field.id === over?.id);
 
-        if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+        if (
+            activeIndex !== -1 &&
+            overIndex !== -1 &&
+            activeIndex !== overIndex
+        ) {
             setFields((items) => arrayMove(items, activeIndex, overIndex));
         }
     };
@@ -622,18 +819,26 @@ const ComponentWorkspace = () => {
                 const nextField: CanvasField = {
                     ...field,
                     ...changes,
-                    hasCustomSlug: changes.hasCustomSlug ?? field.hasCustomSlug ?? false,
+                    hasCustomSlug:
+                        changes.hasCustomSlug ?? field.hasCustomSlug ?? false,
                 };
 
                 if ('slug' in changes) {
-                    const desiredSlug = typeof nextField.slug === 'string' ? nextField.slug : '';
+                    const desiredSlug =
+                        typeof nextField.slug === 'string'
+                            ? nextField.slug
+                            : '';
                     if (desiredSlug.length > 0) {
                         const baseSlug = desiredSlug;
-                        const siblings = previous.filter((item) => item.id !== fieldId);
+                        const siblings = previous.filter(
+                            (item) => item.id !== fieldId,
+                        );
                         let suffix = 1;
                         let candidate = baseSlug;
 
-                        while (siblings.some((item) => item.slug === candidate)) {
+                        while (
+                            siblings.some((item) => item.slug === candidate)
+                        ) {
                             candidate = `${baseSlug}-${suffix}`;
                             suffix += 1;
                         }
@@ -643,12 +848,14 @@ const ComponentWorkspace = () => {
                 }
 
                 return nextField;
-            })
+            }),
         );
     };
 
     const removeField = (fieldId: string) => {
-        setFields((previous) => previous.filter((field) => field.id !== fieldId));
+        setFields((previous) =>
+            previous.filter((field) => field.id !== fieldId),
+        );
         if (selectedFieldId === fieldId) {
             setSelectedFieldId(null);
         }
@@ -691,14 +898,20 @@ const ComponentWorkspace = () => {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '',
+                    'X-CSRF-TOKEN':
+                        (
+                            document.querySelector(
+                                'meta[name="csrf-token"]',
+                            ) as HTMLMetaElement
+                        )?.content ?? '',
                 },
                 body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
                 const errorPayload = await response.json().catch(() => ({}));
-                const message = errorPayload?.message ?? 'Unable to save component.';
+                const message =
+                    errorPayload?.message ?? 'Unable to save component.';
                 throw new Error(message);
             }
 
@@ -716,7 +929,11 @@ const ComponentWorkspace = () => {
             resetWorkspace();
         } catch (requestError) {
             console.error(requestError);
-            setError(requestError instanceof Error ? requestError.message : 'Something went wrong while saving.');
+            setError(
+                requestError instanceof Error
+                    ? requestError.message
+                    : 'Something went wrong while saving.',
+            );
         } finally {
             setSaving(false);
         }
@@ -735,16 +952,24 @@ const ComponentWorkspace = () => {
             <div className="space-y-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-3xl font-semibold">Component Builder</h1>
+                        <h1 className="text-3xl font-semibold">Builder</h1>
                         <p className="text-muted-foreground">
-                            Drag fields from the palette, configure them in the inspector, and save reusable component schemas.
+                            Drag fields from the palette, configure them in the
+                            inspector, and save reusable component schemas.
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" onClick={resetWorkspace} disabled={saving}>
+                        <Button
+                            variant="outline"
+                            onClick={resetWorkspace}
+                            disabled={saving}
+                        >
                             Reset
                         </Button>
-                        <Button onClick={handleSave} disabled={!canSave || saving}>
+                        <Button
+                            onClick={handleSave}
+                            disabled={!canSave || saving}
+                        >
                             {saving ? 'Saving…' : 'Save component'}
                         </Button>
                     </div>
@@ -763,6 +988,9 @@ const ComponentWorkspace = () => {
 
                 <DndContext
                     sensors={sensors}
+                    onDragStart={handleDragStart}
+                    onDragMove={handleDragMove}
+                    onDragCancel={handleDragCancel}
                     onDragEnd={handleDragEnd}
                     collisionDetection={closestCorners}
                 >
@@ -770,69 +998,137 @@ const ComponentWorkspace = () => {
                         <Card className="h-fit">
                             <CardHeader>
                                 <CardTitle>Field palette</CardTitle>
-                                <CardDescription>Select a field type and drag it onto the canvas.</CardDescription>
+                                <CardDescription>
+                                    Select a field type and drag it onto the
+                                    canvas.
+                                </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {palette.map((item) => (
-                                    <PaletteDraggableItem key={item.type} item={item} onAdd={addFieldFromPalette} />
+                                    <PaletteDraggableItem
+                                        key={item.type}
+                                        item={item}
+                                        onAdd={addFieldFromPalette}
+                                    />
                                 ))}
                             </CardContent>
                         </Card>
 
                         <div className="space-y-4">
                             <Card>
-                            <CardHeader>
-                                <CardTitle>Component details</CardTitle>
-                                <CardDescription>These details describe the component schema.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="component-name">Name</Label>
-                                    <Input
-                                        id="component-name"
-                                        value={componentName}
-                                        onChange={(event) => setComponentName(event.target.value)}
-                                        placeholder="Hero Banner"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="component-description">Description</Label>
-                                    <textarea
-                                        id="component-description"
-                                        value={componentDescription}
-                                        onChange={(event) => setComponentDescription(event.target.value)}
-                                        className="min-h-[90px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                        placeholder="A reusable hero section with heading, body and CTA."
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Checkbox
-                                        id="component-active"
-                                        checked={isActive}
-                                        onCheckedChange={(checked) => setIsActive(Boolean(checked))}
-                                    />
-                                    <Label htmlFor="component-active">Component is active</Label>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                <CardHeader>
+                                    <CardTitle>Component details</CardTitle>
+                                    <CardDescription>
+                                        These details describe the component
+                                        schema.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="component-name">
+                                            Name
+                                        </Label>
+                                        <Input
+                                            id="component-name"
+                                            value={componentName}
+                                            onChange={(event) =>
+                                                setComponentName(
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Hero Banner"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="component-description">
+                                            Description
+                                        </Label>
+                                        <textarea
+                                            id="component-description"
+                                            value={componentDescription}
+                                            onChange={(event) =>
+                                                setComponentDescription(
+                                                    event.target.value,
+                                                )
+                                            }
+                                            className="min-h-[90px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                            placeholder="A reusable hero section with heading, body and CTA."
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Checkbox
+                                            id="component-active"
+                                            checked={isActive}
+                                            onCheckedChange={(checked) =>
+                                                setIsActive(Boolean(checked))
+                                            }
+                                        />
+                                        <Label htmlFor="component-active">
+                                            Component is active
+                                        </Label>
+                                    </div>
+                                </CardContent>
+                            </Card>
 
-                            <SortableContext items={fields.map((field) => field.id)} strategy={verticalListSortingStrategy}>
+                            <SortableContext
+                                items={fields.map((field) => field.id)}
+                                strategy={verticalListSortingStrategy}
+                            >
                                 <CanvasDropZone isOver={isOver}>
-                                    <div ref={setCanvasRef} className="space-y-3">
-                                        {fields.length === 0 && (
-                                            <div className="flex h-32 flex-col items-center justify-center text-sm text-muted-foreground">
-                                                <Plus className="mb-2 h-5 w-5" />
-                                                Drag fields from the left palette into this canvas.
-                                            </div>
-                                        )}
-                                        {fields.map((field) => (
-                                            <CanvasSortableItem
-                                                key={field.id}
-                                                field={field}
-                                                isSelected={selectedFieldId === field.id}
-                                                onSelect={setSelectedFieldId}
-                                                onRemove={removeField}
-                                            />
+                                    <div
+                                        ref={setCanvasRef}
+                                        className="space-y-3"
+                                    >
+                                        {fields.length === 0 &&
+                                            !activePaletteItem && (
+                                                <div className="flex h-32 flex-col items-center justify-center text-sm text-muted-foreground">
+                                                    <Plus className="mb-2 h-5 w-5" />
+                                                    Drag fields from the left
+                                                    palette into this canvas.
+                                                </div>
+                                            )}
+                                        {fields.length === 0 &&
+                                            activePaletteItem &&
+                                            pendingInsertIndex !== null && (
+                                                <PalettePlaceholder
+                                                    label={
+                                                        activePaletteItem.label
+                                                    }
+                                                />
+                                            )}
+                                        {fields.length > 0 &&
+                                            activePaletteItem &&
+                                            pendingInsertIndex === 0 && (
+                                                <PalettePlaceholder
+                                                    label={
+                                                        activePaletteItem.label
+                                                    }
+                                                />
+                                            )}
+                                        {fields.map((field, index) => (
+                                            <Fragment key={field.id}>
+                                                <CanvasSortableItem
+                                                    key={field.id}
+                                                    field={field}
+                                                    isSelected={
+                                                        selectedFieldId ===
+                                                        field.id
+                                                    }
+                                                    onSelect={
+                                                        setSelectedFieldId
+                                                    }
+                                                    onRemove={removeField}
+                                                />
+                                                {activePaletteItem &&
+                                                    pendingInsertIndex ===
+                                                        index + 1 && (
+                                                        <PalettePlaceholder
+                                                            label={
+                                                                activePaletteItem.label
+                                                            }
+                                                        />
+                                                    )}
+                                            </Fragment>
                                         ))}
                                     </div>
                                 </CanvasDropZone>
@@ -840,37 +1136,61 @@ const ComponentWorkspace = () => {
                         </div>
 
                         <div className="space-y-4">
-                            <FieldInspector field={selectedField ?? undefined} onChange={updateField} />
+                            <FieldInspector
+                                field={selectedField ?? undefined}
+                                onChange={updateField}
+                            />
                             <Card>
-                            <CardHeader>
-                                <CardTitle>Existing components</CardTitle>
-                                <CardDescription>Recently created schemas.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                {isLoadingComponents && <p className="text-sm text-muted-foreground">Loading…</p>}
-                                {!isLoadingComponents && components.length === 0 && (
-                                    <p className="text-sm text-muted-foreground">Components will appear here after saving.</p>
-                                )}
-                                {!isLoadingComponents &&
-                                    components.map((component) => (
-                                        <div key={component.id} className="space-y-1 rounded-lg border bg-muted/20 p-3 text-sm">
-                                            <div className="font-medium">{component.name}</div>
-                                            <div className="text-muted-foreground">/{component.slug}</div>
-                                            {component.description && (
-                                                <div className="text-muted-foreground">{component.description}</div>
-                                            )}
-                                        </div>
-                                    ))}
-                            </CardContent>
-                        </Card>
-                    </div>
+                                <CardHeader>
+                                    <CardTitle>Existing components</CardTitle>
+                                    <CardDescription>
+                                        Recently created schemas.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    {isLoadingComponents && (
+                                        <p className="text-sm text-muted-foreground">
+                                            Loading…
+                                        </p>
+                                    )}
+                                    {!isLoadingComponents &&
+                                        components.length === 0 && (
+                                            <p className="text-sm text-muted-foreground">
+                                                Components will appear here
+                                                after saving.
+                                            </p>
+                                        )}
+                                    {!isLoadingComponents &&
+                                        components.map((component) => (
+                                            <div
+                                                key={component.id}
+                                                className="space-y-1 rounded-lg border bg-muted/20 p-3 text-sm"
+                                            >
+                                                <div className="font-medium">
+                                                    {component.name}
+                                                </div>
+                                                <div className="text-muted-foreground">
+                                                    /{component.slug}
+                                                </div>
+                                                {component.description && (
+                                                    <div className="text-muted-foreground">
+                                                        {component.description}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </DndContext>
 
                 <Card>
                     <CardHeader>
                         <CardTitle>Payload preview</CardTitle>
-                        <CardDescription>Review the JSON that will be sent to the API.</CardDescription>
+                        <CardDescription>
+                            Review the JSON that will be sent to the API.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <pre className="rounded bg-muted/40 p-4 text-xs">
@@ -882,7 +1202,7 @@ const ComponentWorkspace = () => {
                                     fields,
                                 },
                                 null,
-                                2
+                                2,
                             )}
                         </pre>
                     </CardContent>
