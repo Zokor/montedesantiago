@@ -1,5 +1,5 @@
 import { type MouseEvent, useEffect, useMemo, useState } from 'react';
-import { DndContext, DragEndEvent, DragStartEvent, PointerSensor, useDroppable, useDraggable, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, PointerSensor, closestCorners, useDroppable, useDraggable, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
@@ -513,8 +513,6 @@ const ComponentWorkspace = () => {
     const [components, setComponents] = useState<PersistedComponent[]>([]);
     const [isLoadingComponents, setIsLoadingComponents] = useState(false);
 
-    const [draggedPaletteType, setDraggedPaletteType] = useState<FieldType | null>(null);
-
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
     const { setNodeRef: setCanvasRef, isOver } = useDroppable({ id: 'canvas' });
@@ -552,54 +550,57 @@ const ComponentWorkspace = () => {
         [fields, selectedFieldId]
     );
 
-    const addFieldFromPalette = (type: FieldType) => {
+    const addFieldFromPalette = (type: FieldType, insertIndex?: number) => {
         const paletteItem = palette.find((item) => item.type === type);
         if (!paletteItem) {
             return;
         }
 
-        const baseName = paletteItem.label;
-        const baseSlug = slugify(baseName);
-        let slug = baseSlug;
-        let suffix = 1;
-        while (fields.some((field) => field.slug === slug)) {
-            slug = `${baseSlug}-${suffix}`;
-            suffix += 1;
-        }
+        const newFieldId = generateId();
 
-        const newField: CanvasField = {
-            id: generateId(),
-            type,
-            name: baseName,
-            slug,
-            is_required: false,
-            help_text: '',
-            config: {},
-            hasCustomSlug: false,
-        };
+        setFields((previous) => {
+            const baseName = paletteItem.label;
+            const baseSlug = slugify(baseName);
+            let slug = baseSlug;
+            let suffix = 1;
+            while (previous.some((field) => field.slug === slug)) {
+                slug = `${baseSlug}-${suffix}`;
+                suffix += 1;
+            }
 
-        setFields((previous) => [...previous, newField]);
-        setSelectedFieldId(newField.id);
-    };
+            const newField: CanvasField = {
+                id: newFieldId,
+                type,
+                name: baseName,
+                slug,
+                is_required: false,
+                help_text: '',
+                config: {},
+                hasCustomSlug: false,
+            };
 
-    const handleDragStart = (event: DragStartEvent) => {
-        const data = event.active.data.current as { from?: string; fieldType?: FieldType } | undefined;
+            const nextFields = [...previous];
+            if (typeof insertIndex === 'number' && insertIndex >= 0 && insertIndex <= nextFields.length) {
+                nextFields.splice(insertIndex, 0, newField);
+            } else {
+                nextFields.push(newField);
+            }
 
-        if (data?.from === 'palette' && data.fieldType) {
-            setDraggedPaletteType(data.fieldType);
-        } else {
-            setDraggedPaletteType(null);
-        }
+            return nextFields;
+        });
+
+        setSelectedFieldId(newFieldId);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
+        const data = active.data.current as { from?: string; fieldType?: FieldType } | undefined;
 
-        if (draggedPaletteType) {
-            if (over?.id === 'canvas') {
-                addFieldFromPalette(draggedPaletteType);
-            }
-            setDraggedPaletteType(null);
+        if (data?.from === 'palette' && data.fieldType) {
+            const overIndex = over ? fields.findIndex((field) => field.id === over.id) : -1;
+            const insertIndex = over?.id === 'canvas' ? fields.length : overIndex;
+            const resolvedIndex = insertIndex >= 0 ? insertIndex : fields.length;
+            addFieldFromPalette(data.fieldType, resolvedIndex);
             return;
         }
 
@@ -762,9 +763,8 @@ const ComponentWorkspace = () => {
 
                 <DndContext
                     sensors={sensors}
-                    onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
-                    onDragCancel={() => setDraggedPaletteType(null)}
+                    collisionDetection={closestCorners}
                 >
                     <div className="grid gap-6 lg:grid-cols-[320px_1fr_320px]">
                         <Card className="h-fit">
