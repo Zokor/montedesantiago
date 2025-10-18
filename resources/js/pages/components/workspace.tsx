@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { type MouseEvent, useEffect, useMemo, useState } from 'react';
 import { DndContext, DragEndEvent, DragStartEvent, PointerSensor, useDroppable, useDraggable, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -48,6 +48,7 @@ interface CanvasField {
     is_required: boolean;
     help_text: string;
     config: Record<string, unknown>;
+    hasCustomSlug: boolean;
 }
 
 interface PersistedComponent {
@@ -213,12 +214,18 @@ const CanvasSortableItem = ({ field, isSelected, onSelect, onRemove }: {
     );
 };
 
-const PaletteDraggableItem = ({ item }: { item: PaletteItem }) => {
+const PaletteDraggableItem = ({ item, onAdd }: { item: PaletteItem; onAdd: (type: FieldType) => void }) => {
     const id = `palette-${item.type}`;
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
         id,
         data: { from: 'palette', fieldType: item.type },
     });
+
+    const handleAddClick = (event: MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation();
+        event.preventDefault();
+        onAdd(item.type);
+    };
 
     return (
         <Card
@@ -227,9 +234,23 @@ const PaletteDraggableItem = ({ item }: { item: PaletteItem }) => {
             {...listeners}
             {...attributes}
         >
-            <CardHeader>
-                <CardTitle className="text-base">{item.label}</CardTitle>
-                <CardDescription>{item.description}</CardDescription>
+            <CardHeader className="flex flex-row items-start justify-between space-y-0">
+                <div className="space-y-1">
+                    <CardTitle className="text-base">{item.label}</CardTitle>
+                    <CardDescription>{item.description}</CardDescription>
+                </div>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleAddClick}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onPointerUp={(event) => event.stopPropagation()}
+                    aria-label={`Add ${item.label} field`}
+                >
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">Add {item.label}</span>
+                </Button>
             </CardHeader>
         </Card>
     );
@@ -315,7 +336,15 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                     <Input
                         id="field-name"
                         value={field.name}
-                        onChange={(event) => update({ name: event.target.value })}
+                        onChange={(event) => {
+                            const nextName = event.target.value;
+                            const slugChanges = field.hasCustomSlug ? {} : { slug: slugify(nextName) };
+
+                            update({
+                                name: nextName,
+                                ...slugChanges,
+                            });
+                        }}
                     />
                 </div>
                 <div className="space-y-2">
@@ -323,7 +352,16 @@ const FieldInspector = ({ field, onChange }: InspectorProps) => {
                     <Input
                         id="field-slug"
                         value={field.slug}
-                        onChange={(event) => update({ slug: slugify(event.target.value) })}
+                        onChange={(event) => {
+                            const rawValue = event.target.value;
+                            const nextSlug = slugify(rawValue);
+                            const isCustom = rawValue.trim().length > 0;
+
+                            update({
+                                slug: nextSlug,
+                                hasCustomSlug: isCustom,
+                            });
+                        }}
                     />
                 </div>
                 <div className="flex items-center gap-2">
@@ -537,6 +575,7 @@ const ComponentWorkspace = () => {
             is_required: false,
             help_text: '',
             config: {},
+            hasCustomSlug: false,
         };
 
         setFields((previous) => [...previous, newField]);
@@ -574,7 +613,36 @@ const ComponentWorkspace = () => {
 
     const updateField = (fieldId: string, changes: Partial<CanvasField>) => {
         setFields((previous) =>
-            previous.map((field) => (field.id === fieldId ? { ...field, ...changes } : field))
+            previous.map((field) => {
+                if (field.id !== fieldId) {
+                    return field;
+                }
+
+                const nextField: CanvasField = {
+                    ...field,
+                    ...changes,
+                    hasCustomSlug: changes.hasCustomSlug ?? field.hasCustomSlug ?? false,
+                };
+
+                if ('slug' in changes) {
+                    const desiredSlug = typeof nextField.slug === 'string' ? nextField.slug : '';
+                    if (desiredSlug.length > 0) {
+                        const baseSlug = desiredSlug;
+                        const siblings = previous.filter((item) => item.id !== fieldId);
+                        let suffix = 1;
+                        let candidate = baseSlug;
+
+                        while (siblings.some((item) => item.slug === candidate)) {
+                            candidate = `${baseSlug}-${suffix}`;
+                            suffix += 1;
+                        }
+
+                        nextField.slug = candidate;
+                    }
+                }
+
+                return nextField;
+            })
         );
     };
 
@@ -706,7 +774,7 @@ const ComponentWorkspace = () => {
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {palette.map((item) => (
-                                    <PaletteDraggableItem key={item.type} item={item} />
+                                    <PaletteDraggableItem key={item.type} item={item} onAdd={addFieldFromPalette} />
                                 ))}
                             </CardContent>
                         </Card>
