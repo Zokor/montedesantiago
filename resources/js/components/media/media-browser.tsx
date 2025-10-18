@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
     FilesIcon,
     LayoutGridIcon,
@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { useClipboard } from '@/hooks/use-clipboard';
+import ConfirmDialog from '@/components/confirm-dialog';
 
 interface MediaBrowserProps {
     initialPayload: MediaPayload;
@@ -37,9 +38,10 @@ interface MediaBrowserProps {
 interface SelectionSummaryProps {
     count: number;
     onClear: () => void;
-    onDelete: () => void;
+    onDelete: () => Promise<void> | void;
     onSelect?: () => void;
     allowBulkSelect?: boolean;
+    onRegisterDeleteTrigger?: (open: () => void) => void;
 }
 
 interface UploadDropzoneProps {
@@ -259,6 +261,15 @@ export const MediaBrowser = ({
         return '';
     });
     const [preview, setPreview] = useState<MediaItem | null>(null);
+    const deleteSelectionTriggerRef = useRef<(() => void) | null>(null);
+
+    const registerDeleteSelectionTrigger = useCallback((open: () => void) => {
+        deleteSelectionTriggerRef.current = open;
+    }, []);
+
+    const openDeleteSelectionDialog = useCallback(() => {
+        deleteSelectionTriggerRef.current?.();
+    }, []);
 
     useEffect(() => {
         if (!contextTag) {
@@ -269,11 +280,11 @@ export const MediaBrowser = ({
             return;
         }
 
-        setFilters((current) => ({
-            ...current,
+        setFilters({
+            ...filters,
             context_tag: contextTag,
-        }));
-    }, [contextTag, filters.context_tag, setFilters]);
+        });
+    }, [contextTag, filters, setFilters]);
 
     useEffect(() => {
         const dispose = debounce(() => load(false), 250);
@@ -369,7 +380,7 @@ export const MediaBrowser = ({
 
             if ((event.key === 'Delete' || event.key === 'Backspace') && selected.size > 0) {
                 event.preventDefault();
-                void handleDeleteSelection();
+                openDeleteSelectionDialog();
             }
 
             if ((event.key === 'a' || event.key === 'A') && (event.metaKey || event.ctrlKey)) {
@@ -383,7 +394,7 @@ export const MediaBrowser = ({
         window.addEventListener('keydown', handleKeyDown);
 
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [allowMultiple, handleDeleteSelection, selectAll, selected]);
+    }, [allowMultiple, openDeleteSelectionDialog, selectAll, selected]);
 
     return (
         <div className="flex h-full flex-col gap-4">
@@ -525,6 +536,7 @@ export const MediaBrowser = ({
                     onDelete={handleDeleteSelection}
                     onSelect={onSelect ? confirmSelection : undefined}
                     allowBulkSelect={allowMultiple}
+                    onRegisterDeleteTrigger={registerDeleteSelectionTrigger}
                 />
             )}
 
@@ -575,26 +587,54 @@ export const MediaBrowser = ({
     );
 };
 
-const SelectionSummary = ({ count, onClear, onDelete, onSelect, allowBulkSelect }: SelectionSummaryProps) => (
-    <Card className="border-primary/50 bg-primary/10">
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
-            <span className="font-medium text-primary">{count} item{count === 1 ? '' : 's'} selected</span>
-            <div className="flex items-center gap-2">
-                {allowBulkSelect && onSelect && (
-                    <Button size="sm" onClick={onSelect}>
-                        Use selection
+const SelectionSummary = ({
+    count,
+    onClear,
+    onDelete,
+    onSelect,
+    allowBulkSelect,
+    onRegisterDeleteTrigger,
+}: SelectionSummaryProps) => {
+    const description =
+        count === 1
+            ? 'This action cannot be undone. The selected media item will be permanently removed.'
+            : `This action cannot be undone. ${count} media items will be permanently removed.`;
+
+    return (
+        <Card className="border-primary/50 bg-primary/10">
+            <CardContent className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+                <span className="font-medium text-primary">
+                    {count} item{count === 1 ? '' : 's'} selected
+                </span>
+                <div className="flex items-center gap-2">
+                    {allowBulkSelect && onSelect && (
+                        <Button size="sm" onClick={onSelect}>
+                            Use selection
+                        </Button>
+                    )}
+                    <ConfirmDialog
+                        title="Delete selected media"
+                        description={description}
+                        confirmLabel="Delete"
+                        confirmLoadingLabel="Deleting…"
+                        onConfirm={onDelete}
+                        trigger={({ open, isPending }) => {
+                            onRegisterDeleteTrigger?.(open);
+                            return (
+                                <Button size="sm" variant="destructive" disabled={isPending}>
+                                    Delete selected
+                                </Button>
+                            );
+                        }}
+                    />
+                    <Button size="sm" variant="outline" onClick={onClear}>
+                        Clear selection
                     </Button>
-                )}
-                <Button size="sm" variant="destructive" onClick={onDelete}>
-                    Delete selected
-                </Button>
-                <Button size="sm" variant="outline" onClick={onClear}>
-                    Clear selection
-                </Button>
-            </div>
-        </CardContent>
-    </Card>
-);
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
 
 const UploadDropzone = ({ onUpload, isUploading, queue }: UploadDropzoneProps) => {
     const [isDragActive, setIsDragActive] = useState(false);
@@ -920,9 +960,18 @@ const MediaPreviewDialog = ({ item, open, onClose, onRename, onReplace, onDelete
                                 />
                                 Replace file
                             </label>
-                            <Button size="sm" variant="destructive" onClick={() => onDelete()}>
-                                <Trash2Icon className="mr-1 h-4 w-4" /> Delete
-                            </Button>
+                            <ConfirmDialog
+                                title="Delete media item"
+                                description="This action cannot be undone. The file will be permanently removed from the media library."
+                                confirmLabel="Delete"
+                                confirmLoadingLabel="Deleting…"
+                                onConfirm={onDelete}
+                                trigger={({ isPending }) => (
+                                    <Button size="sm" variant="destructive" disabled={isPending}>
+                                        <Trash2Icon className="mr-1 h-4 w-4" /> Delete
+                                    </Button>
+                                )}
+                            />
                         </div>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 
 import { AdminLayout } from '@/components/Layout/AdminLayout';
+import ConfirmDialog from '@/components/confirm-dialog';
 import MediaPicker from '@/components/media/media-picker';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -181,16 +182,25 @@ const CanvasSortableItem = ({ field, isSelected, onSelect, onRemove }: {
                         {field.name || 'Untitled field'}
                     </CardTitle>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(event) => {
-                        event.stopPropagation();
-                        onRemove(field.id);
-                    }}
-                >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
+                <ConfirmDialog
+                    title="Remove field"
+                    description={`This action will remove ${field.name ? `"${field.name}"` : 'this field'} from the component.`}
+                    confirmLabel="Remove"
+                    confirmLoadingLabel="Removing…"
+                    onConfirm={() => onRemove(field.id)}
+                    trigger={({ isPending }) => (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                            }}
+                            disabled={isPending}
+                        >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                    )}
+                />
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
