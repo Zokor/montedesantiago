@@ -1,3 +1,4 @@
+import AppLogo from '@/components/branding/app-logo';
 import { NavMain } from '@/components/navigation/nav-main';
 import { NavUser } from '@/components/navigation/nav-user';
 import {
@@ -12,20 +13,24 @@ import {
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
-    LayoutDashboard,
     Database,
-    Puzzle,
     FileText,
     Image,
+    LayoutDashboard,
+    Puzzle,
     Users,
 } from 'lucide-react';
-import AppLogo from '@/components/branding/app-logo';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/bo/dashboard',
         icon: LayoutDashboard,
+    },
+    {
+        title: 'Pages',
+        href: '/bo/pages',
+        icon: FileText,
     },
     {
         title: 'Collections',
@@ -36,11 +41,6 @@ const mainNavItems: NavItem[] = [
         title: 'Components',
         href: '/bo/components',
         icon: Puzzle,
-    },
-    {
-        title: 'Pages',
-        href: '/bo/pages',
-        icon: FileText,
     },
     {
         title: 'Media',
