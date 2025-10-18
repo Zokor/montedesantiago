@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
 
-import { AdminLayout } from '@/components/Layout/AdminLayout';
+import { AdminLayout } from '@/components/layout/admin-layout';
 import MediaBrowser from '@/components/media/media-browser';
 import { MediaFilters, MediaPayload } from '@/hooks/use-media-library';
 

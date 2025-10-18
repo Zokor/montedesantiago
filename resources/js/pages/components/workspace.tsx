@@ -4,8 +4,8 @@ import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } 
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
 
-import { AdminLayout } from '@/components/Layout/AdminLayout';
-import ConfirmDialog from '@/components/confirm-dialog';
+import { AdminLayout } from '@/components/layout/admin-layout';
+import ConfirmDialog from '@/components/feedback/confirm-dialog';
 import MediaPicker from '@/components/media/media-picker';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';

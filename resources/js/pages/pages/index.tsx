@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
 
-import { AdminLayout } from '@/components/Layout/AdminLayout';
+import { AdminLayout } from '@/components/layout/admin-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface PaginationLink {

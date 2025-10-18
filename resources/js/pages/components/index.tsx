@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 
-import { AdminLayout } from '@/components/Layout/AdminLayout';
+import { AdminLayout } from '@/components/layout/admin-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

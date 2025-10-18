@@ -1,5 +1,5 @@
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
+import { NavMain } from '@/components/navigation/nav-main';
+import { NavUser } from '@/components/navigation/nav-user';
 import {
     Sidebar,
     SidebarContent,
@@ -19,7 +19,7 @@ import {
     Image,
     Users,
 } from 'lucide-react';
-import AppLogo from './app-logo';
+import AppLogo from '@/components/branding/app-logo';
 
 const mainNavItems: NavItem[] = [
     {

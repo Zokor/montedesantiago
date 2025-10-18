@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { useClipboard } from '@/hooks/use-clipboard';
-import ConfirmDialog from '@/components/confirm-dialog';
+import ConfirmDialog from '@/components/feedback/confirm-dialog';
 
 interface MediaBrowserProps {
     initialPayload: MediaPayload;
